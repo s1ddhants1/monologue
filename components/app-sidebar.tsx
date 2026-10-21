@@ -61,7 +61,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="transition-colors hover:bg-sidebar-accent/50"
             >
               <Link href="/" className="flex items-center gap-3">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
                   <BookHeadphones className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left leading-tight">

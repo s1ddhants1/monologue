@@ -311,17 +311,6 @@ export function FullscreenPlayer() {
       className="fixed inset-0 z-[45] flex flex-col overflow-hidden bg-black font-sans text-foreground select-none"
       onMouseMove={resetIdleTimer}
     >
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <Image
-          src={currentBook.cover || "/placeholder-cover.svg"}
-          alt=""
-          fill
-          priority
-          className="scale-125 object-cover opacity-20 blur-3xl brightness-75 transition-all duration-1000 ease-in-out"
-        />
-        <div className="absolute inset-0 bg-radial from-black/40 via-black/80 to-black/95" />
-      </div>
-
       <header
         className={cn(
           "pointer-events-none absolute inset-x-0 top-0 z-20 flex h-16 items-center justify-end px-5 transition-opacity duration-300 ease-in-out sm:px-8",
@@ -413,7 +402,6 @@ export function FullscreenPlayer() {
                     : "size-56 sm:size-64 md:size-72 lg:size-80",
                 )}
               />
-              <div className="absolute -inset-3 -z-10 rounded-3xl bg-primary/15 opacity-0 blur-2xl transition-opacity group-hover:opacity-100" />
             </div>
 
             <div className="w-full max-w-md space-y-1">
