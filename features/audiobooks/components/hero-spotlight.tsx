@@ -51,7 +51,7 @@ function HeroSpotlightSlide({ item, index, onPlay }: HeroSpotlightSlideProps) {
   const isResume = isCurrent || hasSavedProgress;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-card p-6 shadow-2xl sm:p-8 md:p-10">
+    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-card p-6 sm:p-8 md:p-10">
       <div className="relative z-10 flex flex-col-reverse items-center justify-between gap-6 sm:gap-8 md:flex-row md:gap-12">
         <div className="flex flex-1 flex-col items-center text-center md:items-start md:text-left">
           <h1 className="max-w-2xl text-2xl font-black tracking-tight text-foreground sm:text-3xl md:text-4xl lg:text-5xl">
@@ -97,7 +97,7 @@ function HeroSpotlightSlide({ item, index, onPlay }: HeroSpotlightSlideProps) {
             className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label={`View details for ${item.title}`}
           >
-            <div className="relative size-44 overflow-hidden rounded-2xl border border-white/15 bg-muted/30 shadow-2xl shadow-black/80 transition-transform duration-500 hover:scale-[1.02] sm:size-56 md:size-64">
+            <div className="relative size-44 overflow-hidden rounded-2xl border border-white/15 bg-muted/30 sm:size-56 md:size-64">
               <Image
                 src={coverSrc}
                 alt={item.title}

@@ -269,7 +269,7 @@ export function TranscriptDialog() {
                           onClick={() => handleWordClick(word)}
                           className={cn(
                             "cursor-pointer rounded-sm px-0.5 py-0.5 text-left transition-colors duration-75",
-                            isCurrent && "bg-primary/20 font-medium text-primary shadow-xs",
+                            isCurrent && "bg-primary/20 font-medium text-primary",
                             isSpoken && "text-foreground",
                             !isSpoken &&
                               !isCurrent &&

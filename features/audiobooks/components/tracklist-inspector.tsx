@@ -156,7 +156,7 @@ export function TracklistInspector({ book: propBook, isDrawer = false }: Trackli
   if (!isDrawer) {
     return (
       <Card
-        className="track-list gap-0 rounded-2xl border border-border/80 bg-card/60 p-2 shadow-md sm:p-3"
+        className="track-list gap-0 rounded-2xl border border-border/80 bg-card p-2 sm:p-3"
         id="album-detail-tracklist"
       >
         <ScrollArea className="max-h-[60vh] overflow-hidden pr-1 sm:max-h-[600px] [&_[data-slot=scroll-area-viewport]]:max-h-[60vh] [&_[data-slot=scroll-area-viewport]]:overscroll-contain sm:[&_[data-slot=scroll-area-viewport]]:max-h-[600px]">

@@ -70,10 +70,10 @@ export default async function BookDetailPage({ params }: BookPageProps) {
 
   return (
     <div className="pb-8" id="page-album">
-      <header className="relative my-4 overflow-hidden rounded-3xl border border-white/10 bg-card p-6 shadow-2xl sm:p-8 md:p-10">
+      <header className="relative my-4 overflow-hidden rounded-3xl border border-white/10 bg-card p-6 sm:p-8 md:p-10">
         <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8 md:flex-row md:items-end md:gap-10">
           <div className="relative shrink-0">
-            <div className="size-44 overflow-hidden rounded-2xl border border-white/15 bg-muted/30 shadow-2xl shadow-black/80 sm:size-52 md:size-60">
+            <div className="size-44 overflow-hidden rounded-2xl border border-white/15 bg-muted/30 sm:size-52 md:size-60">
               <Image
                 src={book.cover || "/placeholder-cover.svg"}
                 alt={book.title}

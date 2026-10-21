@@ -18,7 +18,7 @@ export default function NotFound() {
         <EmptyHeader>
           <EmptyMedia
             variant="icon"
-            className="bg-chrome-control h-16 w-16 rounded-2xl border border-border shadow-lg"
+            className="bg-chrome-control h-16 w-16 rounded-2xl border border-border"
           >
             <Headphones size={32} className="text-primary" />
           </EmptyMedia>

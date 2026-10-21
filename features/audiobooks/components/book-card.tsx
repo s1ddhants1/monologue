@@ -51,7 +51,7 @@ export function BookCard({ book }: BookCardProps) {
   };
 
   return (
-    <Card className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-card/60 p-2.5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:bg-card/90 hover:shadow-xl">
+    <Card className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-card p-2.5 transition-colors hover:border-border">
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/40">
         <Link
           href={`/book/${book.id}`}
@@ -63,11 +63,10 @@ export function BookCard({ book }: BookCardProps) {
             alt={book.title}
             width={320}
             height={320}
-            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            className="h-full w-full object-cover"
             loading="lazy"
             unoptimized
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         </Link>
 
         <button
@@ -81,7 +80,7 @@ export function BookCard({ book }: BookCardProps) {
                 : `Play ${book.title}`
           }
           title={isPlayingCurrent ? "Pause" : isResume ? "Resume" : "Play"}
-          className={`absolute right-2.5 bottom-2.5 z-10 flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-300 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 ${
+          className={`absolute right-2.5 bottom-2.5 z-10 flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
             isPlayingCurrent
               ? "translate-y-0 opacity-100"
               : "translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100"

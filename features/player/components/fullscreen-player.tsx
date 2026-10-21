@@ -317,7 +317,7 @@ export function FullscreenPlayer() {
           showControls ? "opacity-100" : "opacity-0 hover:opacity-100",
         )}
       >
-        <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-2 py-1 shadow-lg backdrop-blur-xl">
+        <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-2 py-1 backdrop-blur-xl">
           {isTranscriptConfigured && (
             <Button
               type="button"
@@ -331,7 +331,7 @@ export function FullscreenPlayer() {
               className={cn(
                 "h-8 w-8 cursor-pointer rounded-full transition-colors",
                 sidePanel === "transcript"
-                  ? "bg-primary text-primary-foreground shadow-sm"
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-white/10 hover:text-foreground",
               )}
             >
@@ -352,7 +352,7 @@ export function FullscreenPlayer() {
               className={cn(
                 "h-8 w-8 cursor-pointer rounded-full transition-colors",
                 isTracklistOpen
-                  ? "bg-primary text-primary-foreground shadow-sm"
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-white/10 hover:text-foreground",
               )}
             >
@@ -396,7 +396,7 @@ export function FullscreenPlayer() {
                 height={400}
                 priority
                 className={cn(
-                  "rounded-3xl border border-white/15 object-cover shadow-[0_25px_60px_rgba(0,0,0,0.9)] transition-all duration-300 group-hover:scale-[1.02]",
+                  "rounded-3xl border border-white/15 object-cover",
                   isSidePanelActive
                     ? "size-44 sm:size-52 lg:size-56 xl:size-60"
                     : "size-56 sm:size-64 md:size-72 lg:size-80",
@@ -455,7 +455,7 @@ export function FullscreenPlayer() {
                 onClick={togglePlayPause}
                 disabled={isLoading}
                 title={isPlaying ? "Pause (Space)" : "Play (Space)"}
-                className="size-12 rounded-full shadow-lg"
+                className="size-12 rounded-full"
               >
                 <span className="inline-flex size-6 shrink-0 items-center justify-center">
                   {isLoading ? (
@@ -679,7 +679,7 @@ export function FullscreenPlayer() {
           {isTranscriptConfigured && sidePanel === "transcript" && (
             <div
               id="fad-lyrics-plus-container"
-              className="flex h-full max-h-[50vh] min-h-0 w-full flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur-xl sm:p-7 lg:max-h-full lg:w-auto"
+              className="flex h-full max-h-[50vh] min-h-0 w-full flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:p-7 lg:max-h-full lg:w-auto"
             >
               <div className="flex shrink-0 items-center justify-between border-b border-white/10 pb-3.5">
                 <div className="flex items-center gap-2">
@@ -765,8 +765,7 @@ export function FullscreenPlayer() {
                           }}
                           className={cn(
                             "inline-block cursor-pointer rounded-md px-1 py-0.5 transition-colors duration-150 select-text",
-                            isCurrent &&
-                              "bg-primary/20 font-bold text-primary shadow-xs ring-1 ring-primary/30",
+                            isCurrent && "bg-primary/20 font-bold text-primary",
                             isSpoken &&
                               !isCurrent &&
                               "text-foreground/90 hover:bg-white/5 hover:text-foreground",
