@@ -15,24 +15,34 @@ try {
   console.log("    pnpm add torrent-stream\n");
 }
 
+const DEFAULT_TRACKERS = [
+  "udp://tracker.torrent.eu.org:451/announce",
+  "udp://bittorrent-tracker.encrypt.net:1337/announce",
+  "udp://open.stealth.si:80/announce",
+  "udp://tracker.opentrackr.org:1337/announce",
+  "udp://tracker.dler.org:6969/announce",
+  "udp://tracker.openbittorrent.com:6969/announce",
+  "udp://tracker.tiny-vps.com:6969/announce",
+  "udp://p4p.arenabg.com:1337/announce",
+  "http://ipv4announce.sktorrent.eu:6969/announce",
+  "http://tracker.bt4g.com:2095/announce",
+  "http://tracker.mywaifu.best:6969/announce",
+  "udp://bittorrent-tracker.e-n-c-r-y-p-t.net:1337/announce",
+  "http://bt.okmp3.ru:2710/announce",
+];
+
 const activeEngines = new Map();
 
-function getOrCreateEngine(infoHash) {
+function getOrCreateEngine(infoHash, customTrackers = []) {
   if (!torrentStream) return null;
   const hash = infoHash.toLowerCase();
   if (activeEngines.has(hash)) {
     return activeEngines.get(hash);
   }
 
+  const allTrackers = Array.from(new Set([...DEFAULT_TRACKERS, ...customTrackers]));
   const engine = torrentStream(`magnet:?xt=urn:btih:${hash}`, {
-    trackers: [
-      "udp://tracker.opentrackr.org:1337/announce",
-      "udp://tracker.openbittorrent.com:6969/announce",
-      "udp://tracker.tiny-vps.com:6969/announce",
-      "udp://p4p.arenabg.com:1337/announce",
-      "http://tracker.bt4g.com:2095/announce",
-      "http://bt.okmp3.ru:2710/announce",
-    ],
+    trackers: allTrackers,
   });
 
   const entry = {
@@ -109,7 +119,13 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    const entry = getOrCreateEngine(infoHash.trim());
+    const customTrackers = Array.isArray(parsedUrl.query.tr)
+      ? parsedUrl.query.tr
+      : parsedUrl.query.tr
+        ? [parsedUrl.query.tr]
+        : [];
+
+    const entry = getOrCreateEngine(infoHash.trim(), customTrackers);
     entry.lastUsed = Date.now();
 
     const getAudioMimeType = (fileName) => {
@@ -175,9 +191,34 @@ const server = http.createServer((req, res) => {
         return;
       }
 
+      file.select();
+
       const totalSize = file.length;
       const range = req.headers.range;
       const mime = getAudioMimeType(file.name);
+
+      if (req.method === "HEAD") {
+        if (range) {
+          const parts = range.replace(/bytes=/, "").split("-");
+          const start = parseInt(parts[0], 10);
+          const end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+          const chunksize = end - start + 1;
+          res.writeHead(206, {
+            "Content-Range": `bytes ${start}-${end}/${totalSize}`,
+            "Accept-Ranges": "bytes",
+            "Content-Length": chunksize,
+            "Content-Type": mime,
+          });
+        } else {
+          res.writeHead(200, {
+            "Content-Length": totalSize,
+            "Content-Type": mime,
+            "Accept-Ranges": "bytes",
+          });
+        }
+        res.end();
+        return;
+      }
 
       if (range) {
         const parts = range.replace(/bytes=/, "").split("-");
@@ -203,6 +244,10 @@ const server = http.createServer((req, res) => {
         });
 
         const stream = file.createReadStream({ start, end });
+        stream.on("error", () => {
+          if (!res.headersSent) res.writeHead(500);
+          res.end();
+        });
         req.on("close", () => {
           try {
             stream.destroy?.();
@@ -216,6 +261,10 @@ const server = http.createServer((req, res) => {
           "Accept-Ranges": "bytes",
         });
         const stream = file.createReadStream();
+        stream.on("error", () => {
+          if (!res.headersSent) res.writeHead(500);
+          res.end();
+        });
         req.on("close", () => {
           try {
             stream.destroy?.();
@@ -252,8 +301,8 @@ const server = http.createServer((req, res) => {
   res.end("Not found");
 });
 
-server.listen(PORT, () => {
-  console.log(`🚀 Bridge listening at: http://localhost:${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Bridge listening at: http://0.0.0.0:${PORT}`);
   console.log(`🔗 Health check:        http://localhost:${PORT}/health`);
   console.log(
     `🎧 Audio stream path:   http://localhost:${PORT}/stream?infoHash=<hash>&file=<filename>\n`,
