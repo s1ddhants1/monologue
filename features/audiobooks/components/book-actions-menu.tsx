@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { MoreVertical, Activity, Copy, Check, HardDrive, Users } from "@/components/icons";
+import { MoreVertical, Activity, ExternalLink, HardDrive, Users } from "@/components/icons";
 import { AudiobookDetail } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,8 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { hapticLight } from "@/lib/capacitor";
+import { hapticLight, openExternalUrl } from "@/lib/capacitor";
+import { SOURCE_BASE_URL } from "@/config";
 
 export interface BookActionsMenuProps {
   book: AudiobookDetail;
@@ -28,8 +29,6 @@ export interface BookActionsMenuProps {
 export function BookActionsMenu({ book, className = "" }: BookActionsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMetricsOpen, setIsMetricsOpen] = useState(false);
-  const [hashCopied, setHashCopied] = useState(false);
-  const [magnetCopied, setMagnetCopied] = useState(false);
 
   const handleToggleMenu = () => {
     void hapticLight();
@@ -42,25 +41,15 @@ export function BookActionsMenu({ book, className = "" }: BookActionsMenuProps) 
     setIsMetricsOpen(true);
   };
 
-  const handleCopyHash = () => {
-    if (book.infoHash) {
-      void hapticLight();
-      void navigator.clipboard.writeText(book.infoHash);
-      setHashCopied(true);
-      setTimeout(() => setHashCopied(false), 2000);
-    }
-  };
-
-  const handleCopyMagnet = () => {
-    if (book.magnetUri) {
-      void hapticLight();
-      void navigator.clipboard.writeText(book.magnetUri);
-      setMagnetCopied(true);
-      setTimeout(() => {
-        setMagnetCopied(false);
-        setIsOpen(false);
-      }, 1500);
-    }
+  const handleOpenAbb = () => {
+    void hapticLight();
+    setIsOpen(false);
+    const targetUrl = book.url?.startsWith("http")
+      ? book.url
+      : book.url
+        ? `${SOURCE_BASE_URL}${book.url.startsWith("/") ? "" : "/"}${book.url}`
+        : `${SOURCE_BASE_URL}/abss/${book.id}/`;
+    void openExternalUrl(targetUrl);
   };
 
   return (
@@ -87,21 +76,10 @@ export function BookActionsMenu({ book, className = "" }: BookActionsMenuProps) 
                 <span>Show Metrics</span>
               </DropdownMenuItem>
 
-              {book.magnetUri && (
-                <DropdownMenuItem id="menu-item-copy-magnet" onClick={handleCopyMagnet}>
-                  {magnetCopied ? (
-                    <>
-                      <Check size={15} className="shrink-0 text-emerald-400" />
-                      <span className="text-emerald-400">Copied Magnet!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={15} className="shrink-0 text-muted-foreground" />
-                      <span>Copy Magnet Link</span>
-                    </>
-                  )}
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem id="menu-item-open-abb" onClick={handleOpenAbb}>
+                <ExternalLink size={15} className="shrink-0 text-muted-foreground" />
+                <span>Open on ABB</span>
+              </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -185,29 +163,6 @@ export function BookActionsMenu({ book, className = "" }: BookActionsMenuProps) 
                 )}
               </div>
             </div>
-
-            {book.infoHash && (
-              <div className="space-y-2 rounded-xl border border-border bg-white/[0.02] p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                    Info Hash
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCopyHash}
-                    className="flex h-auto cursor-pointer items-center gap-1 p-0 text-xs text-primary hover:bg-transparent hover:underline"
-                  >
-                    {hashCopied ? <Check size={12} /> : <Copy size={12} />}
-                    <span>{hashCopied ? "Copied" : "Copy"}</span>
-                  </Button>
-                </div>
-                <div className="rounded-lg border border-white/5 bg-black/40 p-2.5 font-mono text-[11px] break-all text-muted-foreground select-all">
-                  {book.infoHash}
-                </div>
-              </div>
-            )}
           </div>
         </DialogContent>
       </Dialog>
