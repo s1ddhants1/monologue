@@ -5,14 +5,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Clock, BookOpen, ListMusic, Sparkles } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   getAudiobookDetail,
@@ -78,34 +70,6 @@ export default async function BookDetailPage({ params }: BookPageProps) {
 
   return (
     <div className="pb-8" id="page-album">
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/">Catalog</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          {primaryCategory && (
-            <>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href={`/category/${primaryCategory.toLowerCase().replace(/\s+/g, "-")}`}>
-                    {primaryCategory}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </>
-          )}
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className="max-w-[200px] truncate sm:max-w-xs">
-              {book.title}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <header className="relative my-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-card/80 via-card/40 to-background p-6 shadow-2xl backdrop-blur-2xl sm:p-8 md:p-10">
         <div
           className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-primary/15 blur-3xl"
