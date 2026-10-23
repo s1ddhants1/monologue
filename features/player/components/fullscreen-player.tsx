@@ -248,14 +248,19 @@ export function FullscreenPlayer() {
   const totalFiles = currentBook.files?.length || 1;
   const isMultiPart = totalFiles > 1;
 
+  const trackerParams =
+    currentBook.trackers && currentBook.trackers.length > 0
+      ? "&" + currentBook.trackers.map((tr) => `tr=${encodeURIComponent(tr)}`).join("&")
+      : "";
+
   const currentAudioUrl =
     settings.streamingMode === "bridge" && settings.bridgeUrl
       ? `${settings.bridgeUrl}/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(
           (currentTrack || currentBook.files?.[0])?.name || `${currentBook.title}.mp3`,
-        )}&track=${currentTrackIndex}`
+        )}&track=${currentTrackIndex}${trackerParams}`
       : `/api/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(
           (currentTrack || currentBook.files?.[0])?.name || `${currentBook.title}.mp3`,
-        )}&track=${currentTrackIndex}`;
+        )}&track=${currentTrackIndex}${trackerParams}`;
 
   const handleTranscribeSide = async () => {
     if (!settings.aiApiKey) {

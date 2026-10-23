@@ -129,10 +129,14 @@ export function BottomAudioBar() {
     void hapticSuccess();
     const track = currentTrack || currentBook.files?.[0];
     const fileName = track?.name || `${currentBook.title}.mp3`;
+    const trackerParams =
+      currentBook.trackers && currentBook.trackers.length > 0
+        ? "&" + currentBook.trackers.map((tr) => `tr=${encodeURIComponent(tr)}`).join("&")
+        : "";
     const streamEndpoint =
       settings.streamingMode === "bridge" && settings.bridgeUrl
-        ? `${settings.bridgeUrl}/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(fileName)}&track=${currentTrackIndex}`
-        : `/api/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(fileName)}&track=${currentTrackIndex}`;
+        ? `${settings.bridgeUrl}/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(fileName)}&track=${currentTrackIndex}${trackerParams}`
+        : `/api/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(fileName)}&track=${currentTrackIndex}${trackerParams}`;
 
     const link = document.createElement("a");
     link.href = streamEndpoint;

@@ -47,10 +47,14 @@ function PlayBookButtonComponent({ book, children, trailingActions }: PlayBookBu
   const handleDownload = () => {
     const track = book.files?.[0];
     const fileName = track?.name || `${book.title}.mp3`;
+    const trackerParams =
+      book.trackers && book.trackers.length > 0
+        ? "&" + book.trackers.map((tr) => `tr=${encodeURIComponent(tr)}`).join("&")
+        : "";
     const streamEndpoint =
       settings.streamingMode === "bridge" && settings.bridgeUrl
-        ? `${settings.bridgeUrl}/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(fileName)}&track=0`
-        : `/api/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(fileName)}&track=0`;
+        ? `${settings.bridgeUrl}/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(fileName)}&track=0${trackerParams}`
+        : `/api/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(fileName)}&track=0${trackerParams}`;
 
     const link = document.createElement("a");
     link.href = streamEndpoint;

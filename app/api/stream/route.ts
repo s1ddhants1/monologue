@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
 import torrentStream from "torrent-stream";
-import { Readable } from "node:stream";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,6 +8,8 @@ interface TorrentFile {
   name: string;
   path: string;
   length: number;
+  select: () => void;
+  deselect: () => void;
   createReadStream: (range?: { start: number; end: number }) => NodeJS.ReadableStream;
 }
 
@@ -26,6 +27,22 @@ interface TorrentEntry {
 
 const HASH_REGEX = /^[a-fA-F0-9]{40}$|^[a-zA-Z2-7]{32}$/;
 const MAX_CONCURRENT_ENGINES = 5;
+
+const DEFAULT_TRACKERS = [
+  "udp://tracker.torrent.eu.org:451/announce",
+  "udp://bittorrent-tracker.encrypt.net:1337/announce",
+  "udp://open.stealth.si:80/announce",
+  "udp://tracker.opentrackr.org:1337/announce",
+  "udp://tracker.dler.org:6969/announce",
+  "udp://tracker.openbittorrent.com:6969/announce",
+  "udp://tracker.tiny-vps.com:6969/announce",
+  "udp://p4p.arenabg.com:1337/announce",
+  "http://ipv4announce.sktorrent.eu:6969/announce",
+  "http://tracker.bt4g.com:2095/announce",
+  "http://tracker.mywaifu.best:6969/announce",
+  "udp://bittorrent-tracker.e-n-c-r-y-p-t.net:1337/announce",
+  "http://bt.okmp3.ru:2710/announce",
+];
 
 declare global {
   var __activeTorrentEngines: Map<string, TorrentEntry> | undefined;
@@ -75,7 +92,10 @@ function evictOldestEngineIfNeeded(): void {
   }
 }
 
-function getOrCreateTorrentEngine(infoHash: string): Promise<TorrentEntry> {
+function getOrCreateTorrentEngine(
+  infoHash: string,
+  customTrackers: string[] = [],
+): Promise<TorrentEntry> {
   const hash = infoHash.toLowerCase();
 
   if (globalEngines.has(hash)) {
@@ -92,24 +112,24 @@ function getOrCreateTorrentEngine(infoHash: string): Promise<TorrentEntry> {
 
   evictOldestEngineIfNeeded();
 
+  const allTrackers = Array.from(new Set([...DEFAULT_TRACKERS, ...customTrackers]));
+
   const promise = new Promise<TorrentEntry>((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      pendingPromises.delete(hash);
-      reject(new Error(`Timeout connecting to swarm for hash: ${hash}`));
-    }, 25000);
+    let finished = false;
 
     const engine = torrentStream(`magnet:?xt=urn:btih:${hash}`, {
-      trackers: [
-        "udp://tracker.opentrackr.org:1337/announce",
-        "udp://tracker.openbittorrent.com:6969/announce",
-        "udp://tracker.tiny-vps.com:6969/announce",
-        "udp://p4p.arenabg.com:1337/announce",
-        "http://tracker.bt4g.com:2095/announce",
-        "http://bt.okmp3.ru:2710/announce",
-        "udp://tracker.torrent.eu.org:451/announce",
-        "udp://open.stealth.si:80/announce",
-      ],
+      trackers: allTrackers,
     }) as unknown as TorrentEngine;
+
+    const timeout = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      pendingPromises.delete(hash);
+      try {
+        engine.destroy(() => {});
+      } catch {}
+      reject(new Error(`Timeout connecting to swarm for hash: ${hash}`));
+    }, 30000);
 
     const entry: TorrentEntry = {
       engine,
@@ -118,6 +138,8 @@ function getOrCreateTorrentEngine(infoHash: string): Promise<TorrentEntry> {
     };
 
     engine.on("ready", () => {
+      if (finished) return;
+      finished = true;
       clearTimeout(timeout);
       pendingPromises.delete(hash);
       entry.files = engine.files;
@@ -126,10 +148,20 @@ function getOrCreateTorrentEngine(infoHash: string): Promise<TorrentEntry> {
     });
 
     engine.on("error", (err: unknown) => {
+      if (finished) return;
+      finished = true;
       clearTimeout(timeout);
       pendingPromises.delete(hash);
+      globalEngines.delete(hash);
+      try {
+        engine.destroy(() => {});
+      } catch {}
       reject(err);
     });
+  });
+
+  promise.catch(() => {
+    pendingPromises.delete(hash);
   });
 
   pendingPromises.set(hash, promise);
@@ -208,6 +240,36 @@ function resolveAudioFile(
   return audioFiles[0];
 }
 
+function createWebStream(nodeStream: NodeJS.ReadableStream): ReadableStream {
+  return new ReadableStream({
+    start(controller) {
+      nodeStream.on("data", (chunk: Buffer) => {
+        controller.enqueue(new Uint8Array(chunk.buffer, chunk.byteOffset, chunk.byteLength));
+      });
+      nodeStream.on("end", () => {
+        try {
+          controller.close();
+        } catch {}
+      });
+      nodeStream.on("error", (err) => {
+        try {
+          controller.error(err);
+        } catch {}
+      });
+      nodeStream.on("close", () => {
+        try {
+          controller.close();
+        } catch {}
+      });
+    },
+    cancel() {
+      try {
+        (nodeStream as { destroy?: () => void }).destroy?.();
+      } catch {}
+    },
+  });
+}
+
 export async function OPTIONS() {
   return new Response(null, {
     status: 204,
@@ -220,26 +282,99 @@ export async function OPTIONS() {
   });
 }
 
-export async function GET(request: NextRequest) {
+export async function HEAD(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const infoHash = searchParams.get("infoHash");
   const requestedFile = searchParams.get("file");
   const trackParam = searchParams.get("track");
   const trackIndex = trackParam !== null ? parseInt(trackParam, 10) : undefined;
+  const customTrackers = searchParams.getAll("tr");
 
   if (!infoHash || !HASH_REGEX.test(infoHash.trim())) {
     return new Response("Invalid or missing 'infoHash' parameter", { status: 400 });
   }
 
   try {
-    const entry = await getOrCreateTorrentEngine(infoHash.trim());
+    const entry = await getOrCreateTorrentEngine(infoHash.trim(), customTrackers);
     entry.lastUsed = Date.now();
 
     const file = resolveAudioFile(entry.files, requestedFile, trackIndex);
-
     if (!file) {
       return new Response("Audio file not found in torrent swarm", { status: 404 });
     }
+
+    file.select();
+
+    const totalSize = file.length;
+    const rangeHeader = request.headers.get("range");
+    const mime = getAudioMimeType(file.name);
+
+    if (rangeHeader) {
+      const parts = rangeHeader.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+
+      if (isNaN(start) || start < 0 || start >= totalSize || end < start) {
+        return new Response("Requested range not satisfiable", {
+          status: 416,
+          headers: {
+            "Content-Range": `bytes */${totalSize}`,
+            "Access-Control-Allow-Origin": "*",
+          },
+        });
+      }
+
+      const chunkSize = end - start + 1;
+      return new Response(null, {
+        status: 206,
+        headers: {
+          "Content-Range": `bytes ${start}-${end}/${totalSize}`,
+          "Accept-Ranges": "bytes",
+          "Content-Length": chunkSize.toString(),
+          "Content-Type": mime,
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
+
+    return new Response(null, {
+      status: 200,
+      headers: {
+        "Content-Length": totalSize.toString(),
+        "Content-Type": mime,
+        "Accept-Ranges": "bytes",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  } catch (err) {
+    return new Response(`Stream error: ${err instanceof Error ? err.message : String(err)}`, {
+      status: 504,
+    });
+  }
+}
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const infoHash = searchParams.get("infoHash");
+  const requestedFile = searchParams.get("file");
+  const trackParam = searchParams.get("track");
+  const trackIndex = trackParam !== null ? parseInt(trackParam, 10) : undefined;
+  const customTrackers = searchParams.getAll("tr");
+
+  if (!infoHash || !HASH_REGEX.test(infoHash.trim())) {
+    return new Response("Invalid or missing 'infoHash' parameter", { status: 400 });
+  }
+
+  try {
+    const entry = await getOrCreateTorrentEngine(infoHash.trim(), customTrackers);
+    entry.lastUsed = Date.now();
+
+    const file = resolveAudioFile(entry.files, requestedFile, trackIndex);
+    if (!file) {
+      return new Response("Audio file not found in torrent swarm", { status: 404 });
+    }
+
+    file.select();
 
     const totalSize = file.length;
     const rangeHeader = request.headers.get("range");
@@ -270,9 +405,10 @@ export async function GET(request: NextRequest) {
           } catch {}
         });
       }
-      const webStream = Readable.toWeb(nodeStream as Readable);
 
-      return new Response(webStream as unknown as ReadableStream, {
+      const webStream = createWebStream(nodeStream);
+
+      return new Response(webStream, {
         status: 206,
         headers: {
           "Content-Range": `bytes ${start}-${end}/${totalSize}`,
@@ -282,27 +418,28 @@ export async function GET(request: NextRequest) {
           "Access-Control-Allow-Origin": "*",
         },
       });
-    } else {
-      const nodeStream = file.createReadStream();
-      if (request.signal) {
-        request.signal.addEventListener("abort", () => {
-          try {
-            (nodeStream as { destroy?: () => void }).destroy?.();
-          } catch {}
-        });
-      }
-      const webStream = Readable.toWeb(nodeStream as Readable);
+    }
 
-      return new Response(webStream as unknown as ReadableStream, {
-        status: 200,
-        headers: {
-          "Content-Length": totalSize.toString(),
-          "Content-Type": mime,
-          "Accept-Ranges": "bytes",
-          "Access-Control-Allow-Origin": "*",
-        },
+    const nodeStream = file.createReadStream();
+    if (request.signal) {
+      request.signal.addEventListener("abort", () => {
+        try {
+          (nodeStream as { destroy?: () => void }).destroy?.();
+        } catch {}
       });
     }
+
+    const webStream = createWebStream(nodeStream);
+
+    return new Response(webStream, {
+      status: 200,
+      headers: {
+        "Content-Length": totalSize.toString(),
+        "Content-Type": mime,
+        "Accept-Ranges": "bytes",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
   } catch (err) {
     return new Response(`Stream error: ${err instanceof Error ? err.message : String(err)}`, {
       status: 504,

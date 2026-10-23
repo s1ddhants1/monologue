@@ -194,10 +194,15 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         activeFileName: track.name,
       });
 
+      const trackerParams =
+        book.trackers && book.trackers.length > 0
+          ? "&" + book.trackers.map((tr) => `tr=${encodeURIComponent(tr)}`).join("&")
+          : "";
+
       const streamEndpoint =
         settings.streamingMode === "bridge" && settings.bridgeUrl
-          ? `${settings.bridgeUrl}/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${trackIdx}`
-          : `/api/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${trackIdx}`;
+          ? `${settings.bridgeUrl}/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${trackIdx}${trackerParams}`
+          : `/api/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${trackIdx}${trackerParams}`;
 
       audio.src = streamEndpoint;
       audio.load();
@@ -234,11 +239,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
           });
           applyInitialSeek();
         })
-        .catch((err) => {
-          console.warn(
-            "[Playback Notice] Auto-play was prevented or waiting for stream buffer:",
-            err,
-          );
+        .catch(() => {
           setIsLoading(false);
         });
     },
@@ -554,6 +555,10 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     };
     const onWaiting = () => setIsLoading(true);
     const onCanPlay = () => setIsLoading(false);
+    const onPlaying = () => {
+      setIsLoading(false);
+      setIsPlaying(true);
+    };
     const onError = () => {
       setIsLoading(false);
       setIsPlaying(false);
@@ -596,6 +601,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     audio.addEventListener("durationchange", onDurationChange);
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
+    audio.addEventListener("playing", onPlaying);
     audio.addEventListener("waiting", onWaiting);
     audio.addEventListener("canplay", onCanPlay);
     audio.addEventListener("ended", onEnded);
@@ -606,6 +612,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       audio.removeEventListener("durationchange", onDurationChange);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("playing", onPlaying);
       audio.removeEventListener("waiting", onWaiting);
       audio.removeEventListener("canplay", onCanPlay);
       audio.removeEventListener("ended", onEnded);

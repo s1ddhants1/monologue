@@ -16,10 +16,15 @@ export function generateM3UPlaylist(book: AudiobookDetail, settings: PlayerSetti
 
   let m3u = "#EXTM3U\n";
   audioFiles.forEach((track, idx) => {
+    const trackerParams =
+      book.trackers && book.trackers.length > 0
+        ? "&" + book.trackers.map((tr) => `tr=${encodeURIComponent(tr)}`).join("&")
+        : "";
+
     const streamUrl =
       settings.streamingMode === "bridge" && settings.bridgeUrl
-        ? `${settings.bridgeUrl}/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${idx}`
-        : `${origin}/api/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${idx}`;
+        ? `${settings.bridgeUrl}/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${idx}${trackerParams}`
+        : `${origin}/api/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${idx}${trackerParams}`;
 
     const trackTitle = track.name.replace(/\.(mp3|m4b|m4a|flac|ogg)$/i, "");
     m3u += `#EXTINF:-1,${book.author ? `${book.author} - ` : ""}${trackTitle}\n`;
