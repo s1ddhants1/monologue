@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
-const sourceUrl = new URL(process.env.SOURCE_BASE_URL || "https://audiobookbay.lu");
+const sourceUrl = (() => {
+  try {
+    const url = new URL(process.env.SOURCE_BASE_URL || "https://audiobookbay.lu");
+    return url.protocol === "http:" || url.protocol === "https:"
+      ? url
+      : new URL("https://audiobookbay.lu");
+  } catch {
+    return new URL("https://audiobookbay.lu");
+  }
+})();
 const sourceImagePattern = {
   protocol: sourceUrl.protocol === "http:" ? "http" : "https",
   hostname: sourceUrl.hostname,
