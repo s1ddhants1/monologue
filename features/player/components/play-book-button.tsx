@@ -104,17 +104,22 @@ function PlayBookButtonComponent({ book, children, trailingActions }: PlayBookBu
       </Button>
 
       {magnetUri && (
-        <Button asChild variant="outline" size="default">
-          <a
-            href={magnetUri}
-            onClick={() => {
-              void hapticLight();
-            }}
-            title="Open in Torrent Client"
-          >
-            <Magnet size={15} />
-            <span>Magnet</span>
-          </a>
+        <Button
+          render={
+            <a
+              href={magnetUri}
+              onClick={() => {
+                void hapticLight();
+              }}
+              title="Open in Torrent Client"
+            />
+          }
+          nativeButton={false}
+          variant="outline"
+          size="default"
+        >
+          <Magnet size={15} />
+          <span>Magnet</span>
         </Button>
       )}
 

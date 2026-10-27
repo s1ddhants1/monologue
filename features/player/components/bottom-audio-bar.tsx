@@ -292,7 +292,10 @@ export function BottomAudioBar() {
               max={duration > 0 ? duration : 100}
               min={0}
               step={1}
-              onValueChange={([val]) => seekTo(val)}
+              onValueChange={(val) => {
+                const v = Array.isArray(val) ? val[0] : val;
+                if (typeof v === "number") seekTo(v);
+              }}
               className="group/player relative flex h-3 flex-1 cursor-pointer touch-none items-center select-none"
               aria-label="Progress scrubber"
             />
@@ -305,17 +308,19 @@ export function BottomAudioBar() {
         <div className="hidden shrink-0 items-center justify-end gap-1 sm:flex sm:w-60 sm:flex-col sm:items-end sm:justify-center md:w-64">
           <div className="flex items-center justify-end gap-1">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  id="speed-btn"
-                  variant="ghost"
-                  size="icon-sm"
-                  title={`Speed: ${playbackRate}x`}
-                  className="font-mono text-xs"
-                >
-                  {playbackRate}x
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    id="speed-btn"
+                    variant="ghost"
+                    size="icon-sm"
+                    title={`Speed: ${playbackRate}x`}
+                    className="font-mono text-xs"
+                  />
+                }
+              >
+                {playbackRate}x
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-32">
                 <DropdownMenuGroup>
@@ -377,26 +382,28 @@ export function BottomAudioBar() {
             </Button>
 
             <DropdownMenu open={isSleepMenuOpen} onOpenChange={setIsSleepMenuOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  id="sleep-timer-btn"
-                  variant={sleepTimerRemaining || sleepOnChapterEnd ? "secondary" : "ghost"}
-                  size="icon-sm"
-                  onClick={() => {
-                    void hapticLight();
-                    setIsSleepMenuOpen((prev) => !prev);
-                  }}
-                  title={
-                    sleepOnChapterEnd
-                      ? "Sleep: End of Chapter"
-                      : sleepTimerRemaining
-                        ? `Sleep in ${Math.ceil(sleepTimerRemaining / 60)}m`
-                        : "Sleep Timer"
-                  }
-                >
-                  <Clock size={16} />
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    type="button"
+                    id="sleep-timer-btn"
+                    variant={sleepTimerRemaining || sleepOnChapterEnd ? "secondary" : "ghost"}
+                    size="icon-sm"
+                    onClick={() => {
+                      void hapticLight();
+                      setIsSleepMenuOpen((prev) => !prev);
+                    }}
+                    title={
+                      sleepOnChapterEnd
+                        ? "Sleep: End of Chapter"
+                        : sleepTimerRemaining
+                          ? `Sleep in ${Math.ceil(sleepTimerRemaining / 60)}m`
+                          : "Sleep Timer"
+                    }
+                  />
+                }
+              >
+                <Clock size={16} />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuLabel className="text-xs">Sleep Timer</DropdownMenuLabel>
@@ -502,7 +509,10 @@ export function BottomAudioBar() {
               value={[isMuted ? 0 : volume * 100]}
               max={100}
               step={1}
-              onValueChange={([val]) => setVolume(val / 100)}
+              onValueChange={(val) => {
+                const v = Array.isArray(val) ? val[0] : val;
+                if (typeof v === "number") setVolume(v / 100);
+              }}
               className="w-20 cursor-pointer"
               aria-label="Volume slider"
             />

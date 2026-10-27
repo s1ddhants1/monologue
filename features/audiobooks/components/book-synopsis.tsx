@@ -122,11 +122,11 @@ export function BookSynopsis({ description }: BookSynopsisProps) {
           )}
         </div>
 
-        <CollapsibleTrigger asChild>
-          <Button type="button" variant="link" size="sm" className="mt-2 h-auto p-0">
-            <span>{isExpanded ? "Show less" : "Read more..."}</span>
-            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </Button>
+        <CollapsibleTrigger
+          render={<Button type="button" variant="link" size="sm" className="mt-2 h-auto p-0" />}
+        >
+          <span>{isExpanded ? "Show less" : "Read more..."}</span>
+          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </CollapsibleTrigger>
       </Collapsible>
     </div>

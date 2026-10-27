@@ -18,32 +18,28 @@ export function CategoryPills({ activeSlug }: CategoryPillsProps) {
       aria-label="Browse by genre"
     >
       <Badge
-        asChild
+        render={<Link href="/explore" role="tab" aria-selected={isAllActive} />}
         variant={isAllActive ? "default" : "secondary"}
         className={cn(
           "cursor-pointer snap-start rounded-full px-3 py-1 text-xs whitespace-nowrap",
           isAllActive && "active",
         )}
       >
-        <Link href="/explore" role="tab" aria-selected={isAllActive}>
-          All
-        </Link>
+        All
       </Badge>
       {POPULAR_CATEGORIES.map((cat) => {
         const isActive = activeSlug === cat.slug;
         return (
           <Badge
             key={cat.slug}
-            asChild
+            render={<Link href={`/category/${cat.slug}`} role="tab" aria-selected={isActive} />}
             variant={isActive ? "default" : "secondary"}
             className={cn(
               "cursor-pointer snap-start rounded-full px-3 py-1 text-xs whitespace-nowrap",
               isActive && "active",
             )}
           >
-            <Link href={`/category/${cat.slug}`} role="tab" aria-selected={isActive}>
-              {cat.name}
-            </Link>
+            {cat.name}
           </Badge>
         );
       })}

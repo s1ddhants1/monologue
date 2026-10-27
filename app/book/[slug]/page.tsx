@@ -129,11 +129,11 @@ export default async function BookDetailPage({ params }: BookPageProps) {
                 {book.categories.map((cat) => (
                   <Badge
                     key={cat}
-                    asChild
+                    render={<Link href={`/category/${cat.toLowerCase().replace(/\s+/g, "-")}`} />}
                     variant="outline"
                     className="rounded-full border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
                   >
-                    <Link href={`/category/${cat.toLowerCase().replace(/\s+/g, "-")}`}>{cat}</Link>
+                    {cat}
                   </Badge>
                 ))}
               </div>

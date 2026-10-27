@@ -29,17 +29,23 @@ export default function NotFound() {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="flex-row gap-3">
-          <Button asChild variant="default" className="inline-flex items-center gap-2">
-            <Link href="/">
-              <Home size={16} />
-              <span>Back to Catalog</span>
-            </Link>
+          <Button
+            render={<Link href="/" />}
+            nativeButton={false}
+            variant="default"
+            className="inline-flex items-center gap-2"
+          >
+            <Home size={16} />
+            <span>Back to Catalog</span>
           </Button>
-          <Button asChild variant="outline" className="inline-flex items-center gap-2">
-            <Link href="/explore">
-              <Compass size={16} />
-              <span>Explore Audiobooks</span>
-            </Link>
+          <Button
+            render={<Link href="/explore" />}
+            nativeButton={false}
+            variant="outline"
+            className="inline-flex items-center gap-2"
+          >
+            <Compass size={16} />
+            <span>Explore Audiobooks</span>
           </Button>
         </EmptyContent>
       </Empty>

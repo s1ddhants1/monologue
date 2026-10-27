@@ -41,11 +41,9 @@ export default function CategoryError({
             <RotateCcw size={16} className="mr-1.5" />
             <span>Retry</span>
           </Button>
-          <Button asChild variant="outline">
-            <Link href="/">
-              <Home size={16} className="mr-1.5" />
-              <span>Back to Catalog</span>
-            </Link>
+          <Button render={<Link href="/" />} nativeButton={false} variant="outline">
+            <Home size={16} className="mr-1.5" />
+            <span>Back to Catalog</span>
           </Button>
         </EmptyContent>
       </Empty>

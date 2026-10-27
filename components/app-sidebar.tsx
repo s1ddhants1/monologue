@@ -57,22 +57,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              asChild
+              render={<Link href="/" className="flex items-center gap-3" />}
               className="transition-colors hover:bg-sidebar-accent/50"
             >
-              <Link href="/" className="flex items-center gap-3">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                  <BookHeadphones className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate text-sm font-bold tracking-tight text-foreground">
-                    Monologue
-                  </span>
-                  <span className="truncate text-[11px] font-medium text-muted-foreground">
-                    Audiobooks
-                  </span>
-                </div>
-              </Link>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                <BookHeadphones className="size-4" />
+              </div>
+              <div className="grid flex-1 text-left leading-tight">
+                <span className="truncate text-sm font-bold tracking-tight text-foreground">
+                  Monologue
+                </span>
+                <span className="truncate text-[11px] font-medium text-muted-foreground">
+                  Audiobooks
+                </span>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -89,15 +87,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
-                    asChild
+                    render={<Link href={item.url} />}
                     isActive={isActive}
                     tooltip={item.title}
                     className="cursor-pointer font-medium transition-all"
                   >
-                    <Link href={item.url}>
-                      <item.icon className="size-4" />
-                      <span>{item.title}</span>
-                    </Link>
+                    <item.icon className="size-4" />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               );
@@ -115,15 +111,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
-                    asChild
+                    render={<Link href={item.url} />}
                     isActive={isActive}
                     tooltip={item.title}
                     className="cursor-pointer font-medium transition-all"
                   >
-                    <Link href={item.url}>
-                      <item.icon className="size-4" />
-                      <span>{item.title}</span>
-                    </Link>
+                    <item.icon className="size-4" />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               );
@@ -136,15 +130,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              asChild
+              render={<Link href="/settings" />}
               isActive={pathname.startsWith("/settings")}
               tooltip="Settings"
               className="cursor-pointer font-medium"
             >
-              <Link href="/settings">
-                <Settings className="size-4" />
-                <span>Settings</span>
-              </Link>
+              <Settings className="size-4" />
+              <span>Settings</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

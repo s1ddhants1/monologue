@@ -45,17 +45,17 @@ export default async function HomePage() {
             </h2>
           </div>
           <Badge
-            asChild
+            render={
+              <Link
+                href="/explore"
+                title="View All Latest Additions"
+                aria-label="View All Latest Additions"
+              />
+            }
             variant="outline"
             className="cursor-pointer border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground hover:bg-white/10 hover:text-foreground"
           >
-            <Link
-              href="/explore"
-              title="View All Latest Additions"
-              aria-label="View All Latest Additions"
-            >
-              All
-            </Link>
+            All
           </Badge>
         </div>
 
@@ -71,8 +71,8 @@ export default async function HomePage() {
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button asChild variant="default" size="sm">
-                <Link href="/">Refresh Feed</Link>
+              <Button render={<Link href="/" />} nativeButton={false} variant="default" size="sm">
+                Refresh Feed
               </Button>
             </EmptyContent>
           </Empty>

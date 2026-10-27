@@ -82,11 +82,14 @@ function HeroSpotlightSlide({ item, index, onPlay }: HeroSpotlightSlideProps) {
               )}
               <span>{isPlayingCurrent ? "Pause" : isResume ? "Resume" : "Listen Now"}</span>
             </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href={`/book/${item.id}`}>
-                <Headphones size={18} className="mr-1.5 text-muted-foreground" />
-                <span>View Details</span>
-              </Link>
+            <Button
+              render={<Link href={`/book/${item.id}`} />}
+              nativeButton={false}
+              variant="outline"
+              size="lg"
+            >
+              <Headphones size={18} className="mr-1.5 text-muted-foreground" />
+              <span>View Details</span>
             </Button>
           </div>
         </div>

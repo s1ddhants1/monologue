@@ -501,7 +501,10 @@ export function FullscreenPlayer() {
                 max={duration > 0 ? duration : 100}
                 min={0}
                 step={1}
-                onValueChange={([val]) => seekTo(val)}
+                onValueChange={(val) => {
+                  const v = Array.isArray(val) ? val[0] : val;
+                  if (typeof v === "number") seekTo(v);
+                }}
                 className="group/fs relative flex h-4 cursor-pointer touch-none items-center select-none"
                 aria-label="Fullscreen progress scrubber"
               />
@@ -518,16 +521,18 @@ export function FullscreenPlayer() {
             <div className="flex w-full max-w-md items-center justify-between pt-1">
               <div className="flex items-center gap-2">
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      title={`Speed: ${playbackRate}x`}
-                      className="h-8 cursor-pointer rounded-lg px-2.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
-                    >
-                      {playbackRate}x
-                    </Button>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        title={`Speed: ${playbackRate}x`}
+                        className="h-8 cursor-pointer rounded-lg px-2.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                      />
+                    }
+                  >
+                    {playbackRate}x
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
@@ -554,40 +559,42 @@ export function FullscreenPlayer() {
                 </DropdownMenu>
 
                 <DropdownMenu open={isSleepMenuOpen} onOpenChange={setIsSleepMenuOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      id="sleep-timer-btn-fs"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        void hapticLight();
-                        setIsSleepMenuOpen((prev) => !prev);
-                      }}
-                      title={
-                        sleepOnChapterEnd
-                          ? "Sleep: End of Chapter"
-                          : sleepTimerRemaining
-                            ? `Sleep in ${Math.ceil(sleepTimerRemaining / 60)}m`
-                            : "Sleep Timer"
-                      }
-                      className={cn(
-                        "h-8 cursor-pointer rounded-lg px-2.5 text-xs transition-colors",
-                        sleepTimerRemaining || sleepOnChapterEnd
-                          ? "bg-primary/20 text-primary"
-                          : "text-muted-foreground hover:bg-white/10 hover:text-foreground",
-                      )}
-                    >
-                      <Clock
-                        size={14}
-                        className={sleepTimerRemaining || sleepOnChapterEnd ? "mr-1.5" : ""}
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        type="button"
+                        id="sleep-timer-btn-fs"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          void hapticLight();
+                          setIsSleepMenuOpen((prev) => !prev);
+                        }}
+                        title={
+                          sleepOnChapterEnd
+                            ? "Sleep: End of Chapter"
+                            : sleepTimerRemaining
+                              ? `Sleep in ${Math.ceil(sleepTimerRemaining / 60)}m`
+                              : "Sleep Timer"
+                        }
+                        className={cn(
+                          "h-8 cursor-pointer rounded-lg px-2.5 text-xs transition-colors",
+                          sleepTimerRemaining || sleepOnChapterEnd
+                            ? "bg-primary/20 text-primary"
+                            : "text-muted-foreground hover:bg-white/10 hover:text-foreground",
+                        )}
                       />
-                      {sleepOnChapterEnd ? (
-                        <span>End of Ch.</span>
-                      ) : sleepTimerRemaining ? (
-                        <span>{Math.ceil(sleepTimerRemaining / 60)}m</span>
-                      ) : null}
-                    </Button>
+                    }
+                  >
+                    <Clock
+                      size={14}
+                      className={sleepTimerRemaining || sleepOnChapterEnd ? "mr-1.5" : ""}
+                    />
+                    {sleepOnChapterEnd ? (
+                      <span>End of Ch.</span>
+                    ) : sleepTimerRemaining ? (
+                      <span>{Math.ceil(sleepTimerRemaining / 60)}m</span>
+                    ) : null}
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
@@ -673,7 +680,10 @@ export function FullscreenPlayer() {
                   value={[isMuted ? 0 : volume * 100]}
                   max={100}
                   step={1}
-                  onValueChange={([val]) => setVolume(val / 100)}
+                  onValueChange={(val) => {
+                    const v = Array.isArray(val) ? val[0] : val;
+                    if (typeof v === "number") setVolume(v / 100);
+                  }}
                   className="w-24 cursor-pointer"
                   aria-label="Volume slider"
                 />

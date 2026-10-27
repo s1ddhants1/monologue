@@ -311,9 +311,10 @@ export function TranscriptDialog() {
                   </span>
                   <Slider
                     value={[isCurrentTrack && duration > 0 ? (currentTime / duration) * 100 : 0]}
-                    onValueChange={([val]) => {
-                      if (isCurrentTrack && duration > 0) {
-                        seekTo((val / 100) * duration);
+                    onValueChange={(val) => {
+                      const numericVal = Array.isArray(val) ? val[0] : val;
+                      if (isCurrentTrack && duration > 0 && typeof numericVal === "number") {
+                        seekTo((numericVal / 100) * duration);
                       }
                     }}
                     max={100}

@@ -114,14 +114,13 @@ export default function LibraryPage() {
           </EmptyHeader>
           <EmptyContent>
             <Button
-              asChild
+              render={<Link href="/explore" onClick={() => void hapticLight()} />}
+              nativeButton={false}
               variant="default"
               className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold"
             >
-              <Link href="/explore" onClick={() => void hapticLight()}>
-                <Compass size={16} />
-                <span>Explore Audiobooks</span>
-              </Link>
+              <Compass size={16} />
+              <span>Explore Audiobooks</span>
             </Button>
           </EmptyContent>
         </Empty>

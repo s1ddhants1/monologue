@@ -32,14 +32,18 @@ export function RecentSection() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge asChild variant="outline" className="cursor-pointer">
-            <Link
-              href="/recent"
-              title="View All Recently Played"
-              aria-label="View All Recently Played"
-            >
-              All
-            </Link>
+          <Badge
+            render={
+              <Link
+                href="/recent"
+                title="View All Recently Played"
+                aria-label="View All Recently Played"
+              />
+            }
+            variant="outline"
+            className="cursor-pointer"
+          >
+            All
           </Badge>
         </div>
       </div>

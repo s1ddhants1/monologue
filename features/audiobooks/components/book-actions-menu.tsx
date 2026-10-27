@@ -56,18 +56,20 @@ export function BookActionsMenu({ book, className = "" }: BookActionsMenuProps) 
     <>
       <div className={`relative inline-block ${className}`}>
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={handleToggleMenu}
-              title="More options"
-              aria-label="More options"
-              id="book-actions-menu-btn"
-            >
-              <MoreVertical size={18} />
-            </Button>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleToggleMenu}
+                title="More options"
+                aria-label="More options"
+                id="book-actions-menu-btn"
+              />
+            }
+          >
+            <MoreVertical size={18} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
             <DropdownMenuGroup>

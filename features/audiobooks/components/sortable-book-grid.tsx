@@ -91,8 +91,7 @@ export function SortableBookGrid({
           </span>
 
           <ToggleGroup
-            type="single"
-            value={sortOption}
+            value={[sortOption]}
             variant="outline"
             size="sm"
             aria-label="Sort audiobooks"

@@ -114,14 +114,13 @@ export default function RecentPage() {
           </EmptyHeader>
           <EmptyContent>
             <Button
-              asChild
+              render={<Link href="/explore" onClick={() => void hapticLight()} />}
+              nativeButton={false}
               variant="default"
               className="gap-2 rounded-xl px-4 py-2 text-xs font-semibold"
             >
-              <Link href="/explore" onClick={() => void hapticLight()}>
-                <Compass size={16} />
-                <span>Discover Audiobooks</span>
-              </Link>
+              <Compass size={16} />
+              <span>Discover Audiobooks</span>
             </Button>
           </EmptyContent>
         </Empty>

@@ -277,10 +277,9 @@ export function StreamingSettingsModal() {
                   AI Provider
                 </FieldLabel>
                 <ToggleGroup
-                  type="single"
-                  value={settings.aiProvider}
+                  value={[settings.aiProvider]}
                   onValueChange={(val) => {
-                    if (val) handleProviderSelect(val as AIProvider);
+                    if (val[0]) handleProviderSelect(val[0] as AIProvider);
                   }}
                   className="grid w-full grid-cols-3 gap-2"
                 >
