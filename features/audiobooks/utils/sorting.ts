@@ -3,6 +3,14 @@ import { AudiobookSummary } from "@/types";
 export type SortOption = "newest" | "popularity" | "title" | "size";
 export type SortDirection = "asc" | "desc";
 
+export function isSortOption(value: string | undefined): value is SortOption {
+  return value === "newest" || value === "popularity" || value === "title" || value === "size";
+}
+
+export function isSortDirection(value: string | undefined): value is SortDirection {
+  return value === "asc" || value === "desc";
+}
+
 export function getDefaultSortDirection(option: SortOption): SortDirection {
   switch (option) {
     case "title":

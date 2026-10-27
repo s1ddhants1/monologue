@@ -65,8 +65,10 @@ export function SettingsView() {
   const handleExportSettings = useCallback(() => {
     void hapticLight();
     try {
+      const exportSettings = { ...settings, aiApiKey: "" };
       const dataStr =
-        "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
+        "data:text/json;charset=utf-8," +
+        encodeURIComponent(JSON.stringify(exportSettings, null, 2));
       const downloadAnchor = document.createElement("a");
       downloadAnchor.setAttribute("href", dataStr);
       downloadAnchor.setAttribute("download", "monologue-settings.json");
@@ -180,6 +182,36 @@ export function SettingsView() {
             <option value="45">45 minutes</option>
             <option value="60">60 minutes</option>
           </select>
+        ),
+      },
+      {
+        id: "haptics",
+        tab: "audio",
+        label: "Haptic Feedback",
+        description: "Use device vibration for player controls and notifications",
+        component: (
+          <input
+            type="checkbox"
+            aria-label="Haptic Feedback"
+            checked={settings.hapticsEnabled}
+            onChange={(e) => updateSettings({ hapticsEnabled: e.target.checked })}
+            className="size-4 accent-primary"
+          />
+        ),
+      },
+      {
+        id: "blur-effects",
+        tab: "audio",
+        label: "Blur Effects",
+        description: "Use backdrop blur for player surfaces and panels",
+        component: (
+          <input
+            type="checkbox"
+            aria-label="Blur Effects"
+            checked={!settings.disableBlur}
+            onChange={(e) => updateSettings({ disableBlur: !e.target.checked })}
+            className="size-4 accent-primary"
+          />
         ),
       },
       {

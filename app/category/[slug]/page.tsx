@@ -8,7 +8,10 @@ import {
   SortOption,
   SortDirection,
   PaginationControls,
+  isSortDirection,
+  isSortOption,
 } from "@/features/audiobooks";
+import { parsePage } from "@/lib/request-params";
 
 export const revalidate = 600;
 
@@ -31,9 +34,13 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const { slug } = await params;
   const urlParams = searchParams ? await searchParams : undefined;
-  const pageNum = parseInt(urlParams?.page || "1", 10) || 1;
-  const initialSort = urlParams?.sort as SortOption | undefined;
-  const initialDirection = urlParams?.dir as SortDirection | undefined;
+  const pageNum = parsePage(urlParams?.page);
+  const initialSort: SortOption | undefined = isSortOption(urlParams?.sort)
+    ? urlParams.sort
+    : undefined;
+  const initialDirection: SortDirection | undefined = isSortDirection(urlParams?.dir)
+    ? urlParams.dir
+    : undefined;
 
   const categoryMeta = POPULAR_CATEGORIES.find((c) => c.slug === slug);
   const displayName = categoryMeta ? categoryMeta.name : slug.replace(/-/g, " ");

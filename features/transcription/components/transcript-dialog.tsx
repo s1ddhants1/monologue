@@ -117,7 +117,7 @@ export function TranscriptDialog() {
       const response = await transcribeAudio({
         infoHash: activeInfoHash ?? undefined,
         trackIndex: activeTrackIndex ?? 0,
-        audioUrl: activeAudioUrl ?? undefined,
+        audioUrl: activeInfoHash ? undefined : (activeAudioUrl ?? undefined),
         byok: {
           provider: settings.aiProvider,
           apiKey: apiKeyToUse,
@@ -145,9 +145,15 @@ export function TranscriptDialog() {
   const handleCopy = () => {
     if (!cached?.transcript?.text) return;
     void hapticLight();
-    void navigator.clipboard.writeText(cached.transcript.text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    void navigator.clipboard
+      .writeText(cached.transcript.text)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() =>
+        setError("Clipboard access is unavailable. Select the transcript text to copy it."),
+      );
   };
 
   const handleDownload = () => {
@@ -160,6 +166,7 @@ export function TranscriptDialog() {
     document.body.appendChild(element);
     element.click();
     element.remove();
+    setTimeout(() => URL.revokeObjectURL(element.href), 0);
   };
 
   const handleWordClick = (word: TranscriptWord) => {

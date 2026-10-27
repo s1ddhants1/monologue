@@ -19,13 +19,7 @@ export interface PlayerSettings {
   theme: string;
   disableBlur: boolean;
   hapticsEnabled: boolean;
-  compactCards: boolean;
   defaultSleepTimer: number;
-  showFeatured: boolean;
-  showRecent: boolean;
-  showRecommended: boolean;
-  generateM3U: boolean;
-  maxPeers: number;
   aiProvider: AIProvider;
   aiApiKey: string;
   aiModel: string;
@@ -44,13 +38,7 @@ export const DEFAULT_SETTINGS: PlayerSettings = {
   theme: "monochrome",
   disableBlur: false,
   hapticsEnabled: true,
-  compactCards: false,
   defaultSleepTimer: 0,
-  showFeatured: true,
-  showRecent: true,
-  showRecommended: true,
-  generateM3U: true,
-  maxPeers: 50,
   aiProvider: "openai",
   aiApiKey: "",
   aiModel: "whisper-1",

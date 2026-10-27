@@ -8,7 +8,10 @@ import {
   SortOption,
   SortDirection,
   PaginationControls,
+  isSortDirection,
+  isSortOption,
 } from "@/features/audiobooks";
+import { parsePage } from "@/lib/request-params";
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +37,11 @@ export async function generateMetadata({ searchParams }: ExplorePageProps): Prom
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const params = searchParams ? await searchParams : undefined;
   const q = params?.q?.trim() || "";
-  const pageNum = parseInt(params?.page || "1", 10) || 1;
-  const initialSort = params?.sort as SortOption | undefined;
-  const initialDirection = params?.dir as SortDirection | undefined;
+  const pageNum = parsePage(params?.page);
+  const initialSort: SortOption | undefined = isSortOption(params?.sort) ? params.sort : undefined;
+  const initialDirection: SortDirection | undefined = isSortDirection(params?.dir)
+    ? params.dir
+    : undefined;
 
   const { results: books, totalPages = 1 } = q
     ? await searchAudiobooks(q, pageNum)

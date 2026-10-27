@@ -77,6 +77,7 @@ export function AppHeader() {
             <InputGroupInput
               type="search"
               id="search-input"
+              aria-label="Search audiobooks"
               placeholder="Search for audiobooks, authors, narrators..."
               autoComplete="off"
               autoCorrect="off"

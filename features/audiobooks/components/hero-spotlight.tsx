@@ -107,7 +107,6 @@ function HeroSpotlightSlide({ item, index, onPlay }: HeroSpotlightSlideProps) {
                 width={320}
                 height={320}
                 priority={index === 0}
-                unoptimized
                 className="h-full w-full object-cover"
               />
             </div>

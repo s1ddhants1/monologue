@@ -110,6 +110,15 @@ export function TracklistInspector({ book: propBook, isDrawer = false }: Trackli
             <TableRow
               key={file.name || idx}
               onClick={() => handleSelectTrack(idx)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  handleSelectTrack(idx);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`${isCurrent && isPlaying ? "Pause" : "Play"} ${displayName}`}
               className={cn(
                 "group/song cursor-pointer transition-colors hover:bg-white/5",
                 isCurrent &&

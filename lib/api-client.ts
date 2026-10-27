@@ -23,9 +23,11 @@ export async function apiClient(
   init?: RequestInit & { next?: { revalidate?: number | false } },
 ): Promise<Response> {
   const url = urlOrPath.startsWith("/") ? `${SOURCE_BASE_URL}${urlOrPath}` : urlOrPath;
+  const timeout = init?.signal ? undefined : AbortSignal.timeout(15000);
 
   const res = await fetch(url, {
     ...init,
+    signal: timeout,
     headers: {
       ...DEFAULT_HEADERS,
       ...init?.headers,

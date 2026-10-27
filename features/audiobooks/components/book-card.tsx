@@ -65,7 +65,6 @@ export function BookCard({ book }: BookCardProps) {
             height={320}
             className="h-full w-full object-cover"
             loading="lazy"
-            unoptimized
           />
         </Link>
 

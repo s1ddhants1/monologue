@@ -127,3 +127,21 @@
     @apply font-sans;
   }
 }
+
+.disable-blur-effects *,
+.disable-blur-effects *::before,
+.disable-blur-effects *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

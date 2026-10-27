@@ -28,7 +28,21 @@ function vibrateFallback(ms: number) {
   }
 }
 
+function isHapticsEnabled(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    const raw =
+      localStorage.getItem("voxbay_player_settings") || localStorage.getItem("abb_player_settings");
+    if (!raw) return true;
+    const settings = JSON.parse(raw) as { hapticsEnabled?: unknown };
+    return settings.hapticsEnabled !== false;
+  } catch {
+    return true;
+  }
+}
+
 export async function hapticLight(): Promise<void> {
+  if (!isHapticsEnabled()) return;
   await readyPromise;
   try {
     if (_Haptics && _ImpactStyle) {
@@ -40,6 +54,7 @@ export async function hapticLight(): Promise<void> {
 }
 
 export async function hapticMedium(): Promise<void> {
+  if (!isHapticsEnabled()) return;
   await readyPromise;
   try {
     if (_Haptics && _ImpactStyle) {
@@ -51,6 +66,7 @@ export async function hapticMedium(): Promise<void> {
 }
 
 export async function hapticSuccess(): Promise<void> {
+  if (!isHapticsEnabled()) return;
   await readyPromise;
   try {
     if (_Haptics && _NotificationType) {
@@ -62,6 +78,7 @@ export async function hapticSuccess(): Promise<void> {
 }
 
 export async function hapticWarning(): Promise<void> {
+  if (!isHapticsEnabled()) return;
   await readyPromise;
   try {
     if (_Haptics && _NotificationType) {
@@ -73,6 +90,7 @@ export async function hapticWarning(): Promise<void> {
 }
 
 export async function hapticLongPress(): Promise<void> {
+  if (!isHapticsEnabled()) return;
   await readyPromise;
   try {
     if (_Haptics && _ImpactStyle) {
@@ -84,6 +102,7 @@ export async function hapticLongPress(): Promise<void> {
 }
 
 export async function hapticSelection(): Promise<void> {
+  if (!isHapticsEnabled()) return;
   await readyPromise;
   try {
     if (_Haptics) {

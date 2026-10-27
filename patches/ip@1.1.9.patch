@@ -1,0 +1,69 @@
+diff --git a/lib/ip.js b/lib/ip.js
+index 3f6a522c0d7cf7126bc028f30f3700ce05e12fd5..05faead59a5e94ce995f2eeb23ad2ae1b0277620 100644
+--- a/lib/ip.js
++++ b/lib/ip.js
+@@ -1,6 +1,7 @@
+ var ip = exports;
+ var { Buffer } = require('buffer');
+ var os = require('os');
++var net = require('net');
+ 
+ ip.toBuffer = function (ip, buff, offset) {
+   offset = ~~offset;
+@@ -311,31 +312,35 @@ ip.isEqual = function (a, b) {
+ };
+ 
+ ip.isPrivate = function (addr) {
+-  // check loopback addresses first
+-  if (ip.isLoopback(addr)) {
+-    return true;
++  if (net.isIP(addr) === 4) {
++    var octets = addr.split('.').map(Number);
++    var first = octets[0];
++    var second = octets[1];
++    return first === 0
++      || first === 10
++      || first === 127
++      || (first === 100 && second >= 64 && second <= 127)
++      || (first === 169 && second === 254)
++      || (first === 172 && second >= 16 && second <= 31)
++      || (first === 192 && (second === 0 || second === 168))
++      || (first === 198 && second >= 18 && second <= 19)
++      || first >= 224;
+   }
+ 
+-  // ensure the ipv4 address is valid
+-  if (!ip.isV6Format(addr)) {
+-    const ipl = ip.normalizeToLong(addr);
+-    if (ipl < 0) {
+-      throw new Error('invalid ipv4 address');
+-    }
+-    // normalize the address for the private range checks that follow
+-    addr = ip.fromLong(ipl);
++  if (net.isIP(addr) === 6) {
++    var lower = addr.toLowerCase();
++    return lower === '::'
++      || lower === '::1'
++      || lower.startsWith('fc')
++      || lower.startsWith('fd')
++      || lower.startsWith('fe8')
++      || lower.startsWith('fe9')
++      || lower.startsWith('fea')
++      || lower.startsWith('feb')
++      || lower.startsWith('::ffff:') && ip.isPrivate(lower.slice(7));
+   }
+ 
+-  // check private ranges
+-  return /^(::f{4}:)?10\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr)
+-    || /^(::f{4}:)?192\.168\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr)
+-    || /^(::f{4}:)?172\.(1[6-9]|2\d|30|31)\.([0-9]{1,3})\.([0-9]{1,3})$/i
+-      .test(addr)
+-    || /^(::f{4}:)?169\.254\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr)
+-    || /^f[cd][0-9a-f]{2}:/i.test(addr)
+-    || /^fe80:/i.test(addr)
+-    || /^::1$/.test(addr)
+-    || /^::$/.test(addr);
++  return true;
+ };
+ 
+ ip.isPublic = function (addr) {

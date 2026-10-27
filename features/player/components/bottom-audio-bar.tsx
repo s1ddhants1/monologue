@@ -73,7 +73,6 @@ export function BottomAudioBar() {
   const setTracklistOpen = useUIStore((s) => s.setTracklistOpen);
   const setFullscreenOpen = useUIStore((s) => s.setFullscreenOpen);
   const settings = useSettingsStore((s) => s.settings);
-  const isTranscriptConfigured = Boolean(settings.aiApiKey && settings.aiApiKey.trim().length > 0);
   const [isSleepMenuOpen, setIsSleepMenuOpen] = React.useState(false);
 
   const handleToggleFullscreen = React.useCallback(() => {
@@ -342,7 +341,7 @@ export function BottomAudioBar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {isTranscriptConfigured && (
+            {currentBook.infoHash && (
               <TranscriptButton
                 trackKey={`${currentBook.infoHash}-${currentTrackIndex}`}
                 audioUrl={
@@ -409,6 +408,25 @@ export function BottomAudioBar() {
                 <DropdownMenuLabel className="text-xs">Sleep Timer</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
+                  {settings.defaultSleepTimer > 0 && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        void hapticLight();
+                        setIsSleepMenuOpen(false);
+                        startSleepTimer(settings.defaultSleepTimer);
+                        toast.info("Sleep Timer", {
+                          description: `Audio will pause in ${settings.defaultSleepTimer} minutes.`,
+                        });
+                      }}
+                    >
+                      <span>Default ({settings.defaultSleepTimer} minutes)</span>
+                      {!sleepOnChapterEnd &&
+                        sleepTimerRemaining !== null &&
+                        Math.ceil(sleepTimerRemaining / 60) === settings.defaultSleepTimer && (
+                          <Check className="size-3.5 text-primary" />
+                        )}
+                    </DropdownMenuItem>
+                  )}
                   {[15, 30, 45, 60].map((mins) => (
                     <DropdownMenuItem
                       key={mins}

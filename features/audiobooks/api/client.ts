@@ -6,6 +6,7 @@ import { SOURCE_BASE_URL } from "@/config/env";
 import { AudiobookSummarySchema, AudiobookDetailSchema } from "./schemas";
 import { deduplicateAudiobooks } from "../utils/recommendations";
 import { computeDeterministicPeers } from "../utils/sorting";
+import { isSafeSlug } from "@/lib/request-params";
 
 const WEBTORRENT_WS_TRACKERS = [
   "wss://tracker.openwebtorrent.com",
@@ -28,6 +29,28 @@ function cleanText(text: string): string {
     .trim();
 }
 
+function parseCategories($: cheerio.CheerioAPI, root: unknown): string[] {
+  const $root = $(root as Parameters<cheerio.CheerioAPI>[0]);
+  const categories = new Set<string>();
+
+  $root.find(".postInfo a, a[rel='category tag']").each((_, el) => {
+    const value = cleanText($(el).text());
+    if (value) categories.add(value);
+  });
+
+  const postInfo = cleanText($root.find(".postInfo").text() || $root.text());
+  const categoryMatch = postInfo.match(/Category:\s*([^|;]+)/i);
+  if (categoryMatch) {
+    categoryMatch[1]
+      .split(/,|\s+\/\s+|\s+\|\s+/)
+      .map(cleanText)
+      .filter((value) => value.length > 1)
+      .forEach((value) => categories.add(value));
+  }
+
+  return Array.from(categories).slice(0, 8);
+}
+
 function parsePostElement($: cheerio.CheerioAPI, el: unknown): AudiobookSummary | null {
   const $el = $(el as Parameters<cheerio.CheerioAPI>[0]);
   const titleA = $el.find(".postTitle h2 a");
@@ -45,16 +68,7 @@ function parsePostElement($: cheerio.CheerioAPI, el: unknown): AudiobookSummary 
       "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=600&auto=format&fit=crop&q=80";
   }
 
-  const postInfo = $el.find(".postInfo").text();
-  const categories: string[] = [];
-  const catMatches = postInfo.match(/Category:\s*([^<\n\r]+)/i);
-  if (catMatches) {
-    catMatches[1]
-      .split(/\s+/)
-      .map((c) => c.trim())
-      .filter((c) => c.length > 1 && !c.includes("&"))
-      .forEach((c) => categories.push(cleanText(c)));
-  }
+  const categories = parseCategories($, $el);
 
   const contentText = $el.find(".postContent").text();
   const formatMatch = contentText.match(/Format:\s*([A-Za-z0-9]+)/i);
@@ -101,7 +115,7 @@ function parsePostElement($: cheerio.CheerioAPI, el: unknown): AudiobookSummary 
   };
 
   const parsed = AudiobookSummarySchema.safeParse(candidate);
-  return parsed.success ? parsed.data : candidate;
+  return parsed.success ? parsed.data : null;
 }
 
 function extractTotalPages($: cheerio.CheerioAPI): number {
@@ -179,7 +193,7 @@ export async function searchAudiobooks(
     return { results: uniqueResults, page, totalPages };
   } catch (err) {
     console.error("searchAudiobooks error:", err);
-    return { results: [], page, totalPages: 1 };
+    throw err;
   }
 }
 
@@ -187,6 +201,9 @@ export async function getCategoryAudiobooks(
   categorySlug: string,
   page = 1,
 ): Promise<{ results: AudiobookSummary[]; page: number; category: string; totalPages?: number }> {
+  if (!isSafeSlug(categorySlug)) {
+    return { results: [], page, category: categorySlug, totalPages: 1 };
+  }
   try {
     const CATEGORY_ALIASES: Record<string, string> = {
       "sci-fi": "doctor-who-sci-fi",
@@ -241,7 +258,7 @@ export async function getCategoryAudiobooks(
     return { results: uniqueResults, page, category: categorySlug, totalPages };
   } catch (err) {
     console.error("getCategoryAudiobooks error:", err);
-    return { results: [], page, category: categorySlug, totalPages: 1 };
+    throw err;
   }
 }
 
@@ -287,13 +304,14 @@ export async function getLatestAudiobooks(
     return { results: uniqueResults, page, totalPages };
   } catch (err) {
     console.error("getLatestAudiobooks error:", err);
-    return { results: [], page, totalPages: 1 };
+    throw err;
   }
 }
 
 export const getAudiobookDetail = cache(async function (
   slug: string,
 ): Promise<AudiobookDetail | null> {
+  if (!isSafeSlug(slug)) return null;
   try {
     let res: Response;
     try {
@@ -514,14 +532,14 @@ export const getAudiobookDetail = cache(async function (
       files: audioFiles,
       totalAudioFiles: audioFiles.length,
       isMultiPart: audioFiles.length > 1,
-      categories: [],
+      categories: parseCategories($, $(".postInfo").first()),
       url: `${SOURCE_BASE_URL}/abss/${slug}/`,
       seeders: computeDeterministicPeers(slug).seeders,
       leechers: computeDeterministicPeers(slug).leechers,
     };
 
     const parsed = AudiobookDetailSchema.safeParse(candidate);
-    return parsed.success ? (parsed.data as AudiobookDetail) : candidate;
+    return parsed.success ? (parsed.data as AudiobookDetail) : null;
   } catch (err) {
     console.error("getAudiobookDetail error:", err);
     return null;

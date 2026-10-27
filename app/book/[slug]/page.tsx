@@ -80,7 +80,6 @@ export default async function BookDetailPage({ params }: BookPageProps) {
                 width={300}
                 height={300}
                 priority
-                unoptimized
                 className="h-full w-full object-cover"
               />
             </div>

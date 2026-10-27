@@ -76,7 +76,6 @@ export function FullscreenPlayer() {
   const isTracklistOpen = useUIStore((s) => s.isTracklistOpen);
   const setTracklistOpen = useUIStore((s) => s.setTracklistOpen);
   const settings = useSettingsStore((s) => s.settings);
-  const isTranscriptConfigured = Boolean(settings.aiApiKey && settings.aiApiKey.trim().length > 0);
 
   const transcripts = useTranscriptionStore((s) => s.transcripts);
   const openTranscript = useTranscriptionStore((s) => s.openTranscript);
@@ -163,7 +162,7 @@ export function FullscreenPlayer() {
       } else if (e.key === "m" || e.key === "M") {
         e.preventDefault();
         toggleMute();
-      } else if (isTranscriptConfigured && (e.key === "l" || e.key === "L")) {
+      } else if (currentBook?.infoHash && (e.key === "l" || e.key === "L")) {
         e.preventDefault();
         setSidePanel((prev) => (prev === "transcript" ? "none" : "transcript"));
       } else if (e.key === "q" || e.key === "Q") {
@@ -186,7 +185,7 @@ export function FullscreenPlayer() {
     setVolume,
     volume,
     toggleMute,
-    isTranscriptConfigured,
+    currentBook?.infoHash,
     isTracklistOpen,
     setTracklistOpen,
   ]);
@@ -283,7 +282,6 @@ export function FullscreenPlayer() {
       const result = await transcribeAudio({
         infoHash: currentBook.infoHash,
         trackIndex: currentTrackIndex,
-        audioUrl: currentAudioUrl,
         byok: {
           provider: settings.aiProvider,
           apiKey: settings.aiApiKey,
@@ -323,7 +321,7 @@ export function FullscreenPlayer() {
         )}
       >
         <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-2 py-1 backdrop-blur-xl">
-          {isTranscriptConfigured && (
+          {currentBook.infoHash && (
             <Button
               type="button"
               variant="ghost"
@@ -605,6 +603,26 @@ export function FullscreenPlayer() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
+                      {settings.defaultSleepTimer > 0 && (
+                        <DropdownMenuItem
+                          onClick={() => {
+                            void hapticLight();
+                            setIsSleepMenuOpen(false);
+                            startSleepTimer(settings.defaultSleepTimer);
+                            toast.info("Sleep Timer", {
+                              description: `Audio will pause in ${settings.defaultSleepTimer} minutes.`,
+                            });
+                          }}
+                          className="flex cursor-pointer items-center justify-between text-xs"
+                        >
+                          <span>Default ({settings.defaultSleepTimer} minutes)</span>
+                          {!sleepOnChapterEnd &&
+                            sleepTimerRemaining !== null &&
+                            Math.ceil(sleepTimerRemaining / 60) === settings.defaultSleepTimer && (
+                              <Check className="size-3.5 text-primary" />
+                            )}
+                        </DropdownMenuItem>
+                      )}
                       {[15, 30, 45, 60].map((mins) => (
                         <DropdownMenuItem
                           key={mins}
@@ -691,7 +709,7 @@ export function FullscreenPlayer() {
             </div>
           </div>
 
-          {isTranscriptConfigured && sidePanel === "transcript" && (
+          {currentBook.infoHash && sidePanel === "transcript" && (
             <div
               id="fad-lyrics-plus-container"
               className="flex h-full max-h-[50vh] min-h-0 w-full flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:p-7 lg:max-h-full lg:w-auto"

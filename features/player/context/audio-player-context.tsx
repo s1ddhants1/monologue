@@ -75,7 +75,9 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
-  const [playbackRate, setPlaybackRateState] = useState<number>(1.0);
+  const [playbackRate, setPlaybackRateState] = useState<number>(
+    () => useSettingsStore.getState().settings.defaultPlaybackRate,
+  );
   const [volume, setVolumeState] = useState<number>(1.0);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [sleepTimerRemaining, setSleepTimerRemaining] = useState<number | null>(null);
@@ -90,6 +92,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const sleepTimerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pendingSeekRef = useRef<number | null>(null);
+  const loadRequestIdRef = useRef(0);
 
   const settings = useSettingsStore((s) => s.settings);
 
@@ -180,6 +183,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
 
       const track = book.files?.[trackIdx];
       if (!track) return;
+      const requestId = ++loadRequestIdRef.current;
 
       setIsLoading(true);
       setCurrentTime(startSeekSeconds);
@@ -228,6 +232,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       audio
         .play()
         .then(() => {
+          if (requestId !== loadRequestIdRef.current) return;
           setIsPlaying(true);
           setIsLoading(false);
           setStreamStatus({
@@ -240,7 +245,13 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
           applyInitialSeek();
         })
         .catch(() => {
+          if (requestId !== loadRequestIdRef.current) return;
           setIsLoading(false);
+          setStreamStatus((prev) => ({
+            ...prev,
+            state: "error",
+            errorMessage: "Audio playback could not be started",
+          }));
         });
     },
     [settings],
@@ -564,7 +575,8 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       setIsPlaying(false);
       setStreamStatus((prev) => ({
         ...prev,
-        state: "idle",
+        state: "error",
+        errorMessage: "Failed to stream audio track",
       }));
       toast.error("Streaming Error", {
         description:
