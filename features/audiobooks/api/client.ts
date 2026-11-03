@@ -4,7 +4,6 @@ import { AudiobookSummary, AudiobookDetail, AudiobookFile } from "@/types";
 import { apiClient, ApiError } from "@/lib/api-client";
 import { SOURCE_BASE_URL } from "@/config/env";
 import { AudiobookSummarySchema, AudiobookDetailSchema } from "./schemas";
-import { deduplicateAudiobooks } from "../utils/recommendations";
 import { computeDeterministicPeers } from "../utils/sorting";
 import { isSafeSlug } from "@/lib/request-params";
 
@@ -545,36 +544,3 @@ export const getAudiobookDetail = cache(async function (
     return null;
   }
 });
-
-export async function getCuratedFallbackAudiobooks(): Promise<AudiobookSummary[]> {
-  try {
-    const queries = [
-      "dune",
-      "hobbit",
-      "1984 orwell",
-      "mistborn",
-      "stephen king",
-      "agatha christie",
-      "neuromancer",
-      "sherlock",
-      "foundation asimov",
-      "neil gaiman",
-    ];
-
-    const responses = await Promise.all(
-      queries.map((q) => searchAudiobooks(q, 1).catch(() => ({ results: [] }))),
-    );
-
-    const candidates: AudiobookSummary[] = [];
-    for (const res of responses) {
-      if (res.results && res.results.length > 0) {
-        candidates.push(res.results[0]);
-      }
-    }
-
-    return deduplicateAudiobooks(candidates, 10);
-  } catch (err) {
-    console.error("getCuratedFallbackAudiobooks error:", err);
-    return [];
-  }
-}

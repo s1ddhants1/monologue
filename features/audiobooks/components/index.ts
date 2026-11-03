@@ -7,4 +7,3 @@ export * from "./recent-section";
 export * from "./sortable-book-grid";
 export * from "./tracklist-inspector";
 export * from "./pagination-controls";
-export * from "./hero-spotlight";

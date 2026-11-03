@@ -1,13 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Flame, Compass } from "@/components/icons";
-import {
-  getLatestAudiobooks,
-  getCuratedFallbackAudiobooks,
-  BookCard,
-  RecentSection,
-  HeroSpotlight,
-} from "@/features/audiobooks";
+import { getLatestAudiobooks, BookCard, RecentSection } from "@/features/audiobooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,18 +16,11 @@ import {
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const [latestData, fallbackBooks] = await Promise.all([
-    getLatestAudiobooks(1),
-    getCuratedFallbackAudiobooks(),
-  ]);
-
+  const latestData = await getLatestAudiobooks(1);
   const latestBooks = latestData.results;
-  const spotlightBooks = fallbackBooks.length > 0 ? fallbackBooks : latestBooks.slice(0, 5);
 
   return (
     <div className="pb-6" id="page-home">
-      {spotlightBooks.length > 0 && <HeroSpotlight books={spotlightBooks} />}
-
       <RecentSection />
 
       <section className="mb-8" id="section-latest">
