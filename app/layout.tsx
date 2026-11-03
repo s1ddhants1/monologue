@@ -34,11 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
-      data-theme="monochrome"
-    >
+    <html lang="en" className="dark h-full antialiased" data-theme="monochrome">
       <body className="min-h-full bg-background font-sans text-foreground selection:bg-primary selection:text-primary-foreground">
         <AudioPlayerProvider>
           <TooltipProvider>
