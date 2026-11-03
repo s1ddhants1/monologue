@@ -7,16 +7,6 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "Monologue · Audiobook Player",
   description:
