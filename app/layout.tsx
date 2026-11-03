@@ -8,9 +8,8 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
-  title: "Monologue · Audiobook Player",
-  description:
-    "Stream and download unabridged audiobooks with chapter cues, multi-part playback, and offline downloads.",
+  title: "Monologue",
+  description: "Audiobook Player",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
