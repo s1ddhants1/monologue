@@ -40,7 +40,7 @@ export default async function HomePage() {
               />
             }
             variant="outline"
-            className="cursor-pointer border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground hover:bg-white/10 hover:text-foreground"
+            className="cursor-pointer"
           >
             All
           </Badge>

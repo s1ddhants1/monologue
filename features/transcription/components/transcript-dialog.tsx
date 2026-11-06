@@ -16,6 +16,7 @@ import {
 } from "@/components/icons";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -247,7 +248,7 @@ export function TranscriptDialog() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border/80 bg-background/50 p-4">
+              <Card className="gap-0 border-border/80 bg-background/50 p-4">
                 <ScrollArea className="max-h-[46vh] pr-3 select-text">
                   <div className="space-y-1 text-base leading-relaxed tracking-normal">
                     {segments.map((segment) => {
@@ -290,9 +291,9 @@ export function TranscriptDialog() {
                     })}
                   </div>
                 </ScrollArea>
-              </div>
+              </Card>
 
-              <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <Card className="gap-0 border-border/60 bg-muted/20 p-3">
                 <div className="flex items-center gap-3">
                   <Button
                     type="button"
@@ -333,7 +334,7 @@ export function TranscriptDialog() {
                     {isCurrentTrack && duration > 0 ? formatTime(duration) : "--:--"}
                   </span>
                 </div>
-              </div>
+              </Card>
             </div>
           ) : isLoading ? (
             <div className="flex flex-col items-center justify-center space-y-4 py-16 text-center">
@@ -365,13 +366,13 @@ export function TranscriptDialog() {
                   </EmptyTitle>
                   <EmptyDescription className="text-xs text-muted-foreground">
                     Use your BYOK (Bring Your Own Key) model to generate a synchronized, word-level
-                    transcript powered by AI SDK and ElevenLabs UI.
+                    transcript powered by AI SDK.
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
 
               {!settings.aiApiKey && (
-                <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
+                <Card className="gap-0 border-border bg-muted/20 p-4">
                   <Field>
                     <div className="mb-2 flex items-center justify-between">
                       <FieldLabel className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
@@ -403,7 +404,7 @@ export function TranscriptDialog() {
                       Your key is saved locally in your browser and used only to transcribe audio.
                     </FieldDescription>
                   </Field>
-                </div>
+                </Card>
               )}
 
               <div className="flex justify-end pt-2">

@@ -17,6 +17,7 @@ import { useSettingsStore } from "../stores";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Empty,
   EmptyHeader,
@@ -25,6 +26,7 @@ import {
   EmptyDescription,
   EmptyContent,
 } from "@/components/ui/empty";
+import { FieldGroup, Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   InputGroup,
@@ -32,10 +34,54 @@ import {
   InputGroupInput,
   InputGroupButton,
 } from "@/components/ui/input-group";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { hapticLight, openExternalUrl } from "@/lib/capacitor";
+import type { AIProvider } from "@/types";
 
 export type SettingsTabId = "audio" | "transcription" | "about";
+
+const PLAYBACK_SPEED_ITEMS = [
+  { label: "0.75x", value: "0.75" },
+  { label: "1.0x (Normal)", value: "1" },
+  { label: "1.2x", value: "1.2" },
+  { label: "1.25x", value: "1.25" },
+  { label: "1.5x", value: "1.5" },
+  { label: "1.75x", value: "1.75" },
+  { label: "2.0x", value: "2" },
+];
+
+const SKIP_FORWARD_ITEMS = [
+  { label: "10 seconds", value: "10" },
+  { label: "15 seconds", value: "15" },
+  { label: "30 seconds", value: "30" },
+  { label: "45 seconds", value: "45" },
+  { label: "60 seconds", value: "60" },
+];
+
+const SKIP_BACKWARD_ITEMS = [
+  { label: "5 seconds", value: "5" },
+  { label: "10 seconds", value: "10" },
+  { label: "15 seconds", value: "15" },
+  { label: "30 seconds", value: "30" },
+];
+
+const SLEEP_TIMER_ITEMS = [
+  { label: "Off", value: "0" },
+  { label: "15 minutes", value: "15" },
+  { label: "30 minutes", value: "30" },
+  { label: "45 minutes", value: "45" },
+  { label: "60 minutes", value: "60" },
+];
 
 interface SettingItemDefinition {
   id: string;
@@ -93,24 +139,27 @@ export function SettingsView() {
         label: "Default Playback Speed",
         description: "Initial narration speed for audio playback",
         component: (
-          <select
-            id="playback-speed-select"
-            aria-label="Default Playback Speed"
-            className="bg-chrome-control hover:bg-chrome-control-hover h-8 cursor-pointer rounded-md border border-border px-2.5 py-1 text-xs text-foreground transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            value={settings.defaultPlaybackRate}
-            onChange={(e) => {
+          <Select
+            items={PLAYBACK_SPEED_ITEMS}
+            value={String(settings.defaultPlaybackRate)}
+            onValueChange={(val) => {
               void hapticLight();
-              updateSettings({ defaultPlaybackRate: parseFloat(e.target.value) });
+              if (val) updateSettings({ defaultPlaybackRate: parseFloat(val) });
             }}
           >
-            <option value="0.75">0.75x</option>
-            <option value="1">1.0x (Normal)</option>
-            <option value="1.2">1.2x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="1.75">1.75x</option>
-            <option value="2">2.0x</option>
-          </select>
+            <SelectTrigger size="sm" className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent alignItemWithTrigger={false} side="bottom">
+              <SelectGroup>
+                {PLAYBACK_SPEED_ITEMS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         ),
       },
       {
@@ -119,22 +168,27 @@ export function SettingsView() {
         label: "Skip Forward Interval",
         description: "Amount of seconds to jump forward when pressing skip forward",
         component: (
-          <select
-            id="skip-forward-select"
-            aria-label="Skip Forward Interval"
-            className="bg-chrome-control hover:bg-chrome-control-hover h-8 cursor-pointer rounded-md border border-border px-2.5 py-1 text-xs text-foreground transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            value={settings.skipForwardSeconds}
-            onChange={(e) => {
+          <Select
+            items={SKIP_FORWARD_ITEMS}
+            value={String(settings.skipForwardSeconds)}
+            onValueChange={(val) => {
               void hapticLight();
-              updateSettings({ skipForwardSeconds: parseInt(e.target.value, 10) });
+              if (val) updateSettings({ skipForwardSeconds: parseInt(val, 10) });
             }}
           >
-            <option value="10">10 seconds</option>
-            <option value="15">15 seconds</option>
-            <option value="30">30 seconds</option>
-            <option value="45">45 seconds</option>
-            <option value="60">60 seconds</option>
-          </select>
+            <SelectTrigger size="sm" className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent alignItemWithTrigger={false} side="bottom">
+              <SelectGroup>
+                {SKIP_FORWARD_ITEMS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         ),
       },
       {
@@ -143,21 +197,27 @@ export function SettingsView() {
         label: "Skip Backward Interval",
         description: "Amount of seconds to jump backward when pressing skip backward",
         component: (
-          <select
-            id="skip-backward-select"
-            aria-label="Skip Backward Interval"
-            className="bg-chrome-control hover:bg-chrome-control-hover h-8 cursor-pointer rounded-md border border-border px-2.5 py-1 text-xs text-foreground transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            value={settings.skipBackwardSeconds}
-            onChange={(e) => {
+          <Select
+            items={SKIP_BACKWARD_ITEMS}
+            value={String(settings.skipBackwardSeconds)}
+            onValueChange={(val) => {
               void hapticLight();
-              updateSettings({ skipBackwardSeconds: parseInt(e.target.value, 10) });
+              if (val) updateSettings({ skipBackwardSeconds: parseInt(val, 10) });
             }}
           >
-            <option value="5">5 seconds</option>
-            <option value="10">10 seconds</option>
-            <option value="15">15 seconds</option>
-            <option value="30">30 seconds</option>
-          </select>
+            <SelectTrigger size="sm" className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent alignItemWithTrigger={false} side="bottom">
+              <SelectGroup>
+                {SKIP_BACKWARD_ITEMS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         ),
       },
       {
@@ -166,22 +226,27 @@ export function SettingsView() {
         label: "Default Sleep Timer",
         description: "Preset timer duration when activating sleep countdown",
         component: (
-          <select
-            id="sleep-timer-select"
-            aria-label="Default Sleep Timer"
-            className="bg-chrome-control hover:bg-chrome-control-hover h-8 cursor-pointer rounded-md border border-border px-2.5 py-1 text-xs text-foreground transition-all outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            value={settings.defaultSleepTimer}
-            onChange={(e) => {
+          <Select
+            items={SLEEP_TIMER_ITEMS}
+            value={String(settings.defaultSleepTimer)}
+            onValueChange={(val) => {
               void hapticLight();
-              updateSettings({ defaultSleepTimer: parseInt(e.target.value, 10) });
+              if (val) updateSettings({ defaultSleepTimer: parseInt(val, 10) });
             }}
           >
-            <option value="0">Off</option>
-            <option value="15">15 minutes</option>
-            <option value="30">30 minutes</option>
-            <option value="45">45 minutes</option>
-            <option value="60">60 minutes</option>
-          </select>
+            <SelectTrigger size="sm" className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent alignItemWithTrigger={false} side="bottom">
+              <SelectGroup>
+                {SLEEP_TIMER_ITEMS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         ),
       },
       {
@@ -190,12 +255,13 @@ export function SettingsView() {
         label: "Haptic Feedback",
         description: "Use device vibration for player controls and notifications",
         component: (
-          <input
-            type="checkbox"
-            aria-label="Haptic Feedback"
+          <Switch
             checked={settings.hapticsEnabled}
-            onChange={(e) => updateSettings({ hapticsEnabled: e.target.checked })}
-            className="size-4 accent-primary"
+            onCheckedChange={(checked) => {
+              void hapticLight();
+              updateSettings({ hapticsEnabled: checked });
+            }}
+            aria-label="Haptic Feedback"
           />
         ),
       },
@@ -205,12 +271,13 @@ export function SettingsView() {
         label: "Blur Effects",
         description: "Use backdrop blur for player surfaces and panels",
         component: (
-          <input
-            type="checkbox"
-            aria-label="Blur Effects"
+          <Switch
             checked={!settings.disableBlur}
-            onChange={(e) => updateSettings({ disableBlur: !e.target.checked })}
-            className="size-4 accent-primary"
+            onCheckedChange={(checked) => {
+              void hapticLight();
+              updateSettings({ disableBlur: !checked });
+            }}
+            aria-label="Blur Effects"
           />
         ),
       },
@@ -220,122 +287,136 @@ export function SettingsView() {
         label: "AI Audio Transcription (BYOK)",
         description: "Configure your API key and provider to enable word-synchronized transcripts",
         component: (
-          <div className="bg-chrome-control/50 mt-3 flex w-full max-w-lg flex-col gap-3 rounded-xl border border-border p-4">
-            <div className="space-y-1.5">
-              <span className="block text-xs font-medium text-foreground">AI Provider</span>
-              <div className="grid grid-cols-3 gap-2">
-                {(["openai", "groq", "custom"] as const).map((prov) => (
-                  <Button
-                    key={prov}
-                    type="button"
-                    variant={settings.aiProvider === prov ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      void hapticLight();
-                      updateSettings({
-                        aiProvider: prov,
-                        aiModel:
-                          prov === "groq"
-                            ? "whisper-large-v3"
-                            : prov === "openai"
-                              ? "whisper-1"
-                              : settings.aiModel,
-                      });
+          <Card className="mt-3 w-full max-w-lg border-border bg-card">
+            <CardContent className="flex flex-col gap-4 p-4">
+              <FieldGroup className="gap-4">
+                <Field className="gap-2">
+                  <FieldLabel className="text-xs font-medium text-foreground">
+                    AI Provider
+                  </FieldLabel>
+                  <ToggleGroup
+                    value={[settings.aiProvider]}
+                    onValueChange={(val) => {
+                      if (val[0]) {
+                        void hapticLight();
+                        const prov = val[0] as AIProvider;
+                        updateSettings({
+                          aiProvider: prov,
+                          aiModel:
+                            prov === "groq"
+                              ? "whisper-large-v3"
+                              : prov === "openai"
+                                ? "whisper-1"
+                                : settings.aiModel,
+                        });
+                      }
                     }}
-                    className="cursor-pointer rounded-xl text-xs capitalize"
+                    className="grid grid-cols-3 gap-2"
                   >
-                    {prov}
-                  </Button>
-                ))}
-              </div>
-            </div>
+                    {(["openai", "groq", "custom"] as const).map((prov) => (
+                      <ToggleGroupItem
+                        key={prov}
+                        value={prov}
+                        className="cursor-pointer rounded-xl text-xs capitalize"
+                      >
+                        {prov}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                </Field>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-1 text-xs font-medium text-foreground">
-                  <Key size={13} className="text-primary" />
-                  API Key
-                </label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  className="h-auto cursor-pointer items-center gap-1 p-0 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground"
-                >
-                  {showApiKey ? <EyeOff size={12} /> : <Eye size={12} />}
-                  <span>{showApiKey ? "Hide" : "Show"}</span>
-                </Button>
-              </div>
-              <Input
-                type={showApiKey ? "text" : "password"}
-                placeholder={settings.aiProvider === "groq" ? "gsk_..." : "sk-..."}
-                value={settings.aiApiKey}
-                onChange={(e) => updateSettings({ aiApiKey: e.target.value })}
-                className="font-mono text-xs"
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Your key never leaves your browser except to query your selected AI endpoint.
-              </p>
-            </div>
+                <Field className="gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <FieldLabel className="flex items-center gap-1 text-xs font-medium text-foreground">
+                      <Key size={13} className="text-primary" />
+                      API Key
+                    </FieldLabel>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowApiKey(!showApiKey)}
+                      className="h-auto cursor-pointer items-center gap-1 p-0 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground"
+                    >
+                      {showApiKey ? <EyeOff size={12} /> : <Eye size={12} />}
+                      <span>{showApiKey ? "Hide" : "Show"}</span>
+                    </Button>
+                  </div>
+                  <Input
+                    type={showApiKey ? "text" : "password"}
+                    placeholder={settings.aiProvider === "groq" ? "gsk_..." : "sk-..."}
+                    value={settings.aiApiKey}
+                    onChange={(e) => updateSettings({ aiApiKey: e.target.value })}
+                    className="font-mono text-xs"
+                  />
+                  <FieldDescription className="text-[11px] text-muted-foreground">
+                    Your key never leaves your browser except to query your selected AI endpoint.
+                  </FieldDescription>
+                </Field>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">Model Name</label>
-              <Input
-                type="text"
-                placeholder="whisper-1"
-                value={settings.aiModel}
-                onChange={(e) => updateSettings({ aiModel: e.target.value })}
-                className="font-mono text-xs"
-              />
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                <span className="text-[11px] text-muted-foreground">Presets:</span>
-                {(settings.aiProvider === "groq"
-                  ? ["whisper-large-v3", "whisper-large-v3-turbo"]
-                  : ["whisper-1", "gpt-4o-transcribe"]
-                ).map((m) => (
-                  <Button
-                    key={m}
-                    type="button"
-                    variant={settings.aiModel === m ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => {
-                      void hapticLight();
-                      updateSettings({ aiModel: m });
-                    }}
-                    className="h-6 cursor-pointer rounded-md px-2 font-mono text-[10px]"
-                  >
-                    {m}
-                  </Button>
-                ))}
-              </div>
-            </div>
+                <Field className="gap-1.5">
+                  <FieldLabel className="text-xs font-medium text-foreground">
+                    Model Name
+                  </FieldLabel>
+                  <Input
+                    type="text"
+                    placeholder="whisper-1"
+                    value={settings.aiModel}
+                    onChange={(e) => updateSettings({ aiModel: e.target.value })}
+                    className="font-mono text-xs"
+                  />
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[11px] text-muted-foreground">Presets:</span>
+                    {(settings.aiProvider === "groq"
+                      ? ["whisper-large-v3", "whisper-large-v3-turbo"]
+                      : ["whisper-1", "gpt-4o-transcribe"]
+                    ).map((m) => (
+                      <Button
+                        key={m}
+                        type="button"
+                        variant={settings.aiModel === m ? "secondary" : "ghost"}
+                        size="sm"
+                        onClick={() => {
+                          void hapticLight();
+                          updateSettings({ aiModel: m });
+                        }}
+                        className="h-6 cursor-pointer rounded-md px-2 font-mono text-[10px]"
+                      >
+                        {m}
+                      </Button>
+                    ))}
+                  </div>
+                </Field>
 
-            {settings.aiProvider === "custom" && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground">Base URL</label>
-                <Input
-                  type="text"
-                  placeholder="https://api.openai.com/v1"
-                  value={settings.aiBaseUrl}
-                  onChange={(e) => updateSettings({ aiBaseUrl: e.target.value })}
-                  className="font-mono text-xs"
-                />
-              </div>
-            )}
+                {settings.aiProvider === "custom" && (
+                  <Field className="gap-1.5">
+                    <FieldLabel className="text-xs font-medium text-foreground">
+                      Base URL
+                    </FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="https://api.openai.com/v1"
+                      value={settings.aiBaseUrl}
+                      onChange={(e) => updateSettings({ aiBaseUrl: e.target.value })}
+                      className="font-mono text-xs"
+                    />
+                  </Field>
+                )}
+              </FieldGroup>
 
-            {settings.aiApiKey.trim() ? (
-              <div className="flex items-center gap-1.5 text-xs text-emerald-400">
-                <Check size={14} />
-                <span>AI transcription configured and active</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Sparkles size={14} className="text-primary" />
-                <span>Enter an API key to enable transcript controls in the player</span>
-              </div>
-            )}
-          </div>
+              {settings.aiApiKey.trim() ? (
+                <div className="flex items-center gap-1.5 text-xs text-emerald-400">
+                  <Check size={14} />
+                  <span>AI transcription configured and active</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Sparkles size={14} className="text-primary" />
+                  <span>Enter an API key to enable transcript controls in the player</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         ),
       },
       {

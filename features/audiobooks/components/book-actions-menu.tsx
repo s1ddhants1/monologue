@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { MoreVertical, Activity, ExternalLink, HardDrive, Users } from "@/components/icons";
 import { AudiobookDetail } from "@/types";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -97,74 +98,74 @@ export function BookActionsMenu({ book, className = "" }: BookActionsMenuProps) 
               {book.title}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 pt-1">
-            <div className="rounded-xl border border-border bg-white/[0.02] p-4">
+          <div className="flex flex-col gap-4 pt-1">
+            <Card className="gap-0 border-border bg-card/60 p-4">
               <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 <Users size={14} className="text-primary" />
                 <span>Swarm Activity</span>
               </div>
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-                <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                <Card className="gap-0 border-border/60 bg-muted/30 p-3">
                   <div className="text-[11px] text-muted-foreground">Seeders</div>
                   <div className="mt-0.5 flex items-center gap-1.5 text-lg font-bold text-emerald-400">
-                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="inline-block size-2 rounded-full bg-emerald-500" />
                     {book.seeders ?? 0}
                   </div>
-                </div>
-                <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                </Card>
+                <Card className="gap-0 border-border/60 bg-muted/30 p-3">
                   <div className="text-[11px] text-muted-foreground">Leechers</div>
                   <div className="mt-0.5 flex items-center gap-1.5 text-lg font-bold text-sky-400">
-                    <span className="inline-block h-2 w-2 rounded-full bg-sky-500" />
+                    <span className="inline-block size-2 rounded-full bg-sky-500" />
                     {book.leechers ?? 0}
                   </div>
-                </div>
-                <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                </Card>
+                <Card className="gap-0 border-border/60 bg-muted/30 p-3">
                   <div className="text-[11px] text-muted-foreground">Audio Size</div>
                   <div className="mt-0.5 truncate font-mono text-base font-bold text-foreground sm:text-lg">
                     {book.fileSize || "Unknown"}
                   </div>
-                </div>
-                <div className="rounded-lg border border-white/5 bg-white/5 p-3">
+                </Card>
+                <Card className="gap-0 border-border/60 bg-muted/30 p-3">
                   <div className="text-[11px] text-muted-foreground">Total Peers</div>
                   <div className="mt-0.5 text-lg font-bold text-foreground">
                     {(book.seeders ?? 0) + (book.leechers ?? 0)}
                   </div>
-                </div>
+                </Card>
               </div>
-            </div>
+            </Card>
 
-            <div className="rounded-xl border border-border bg-white/[0.02] p-4">
+            <Card className="gap-0 border-border bg-card/60 p-4">
               <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 <HardDrive size={14} className="text-primary" />
                 <span>Media &amp; Audio Specs</span>
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="flex justify-between border-b border-white/5 py-1">
+                <div className="flex justify-between border-b border-border/40 py-1">
                   <span className="text-muted-foreground">Format</span>
                   <span className="font-mono font-medium text-foreground">
                     {book.format || "Unknown"}
                   </span>
                 </div>
-                <div className="flex justify-between border-b border-white/5 py-1">
+                <div className="flex justify-between border-b border-border/40 py-1">
                   <span className="text-muted-foreground">Bitrate</span>
                   <span className="font-mono font-medium text-foreground">
                     {book.bitrate || "Unknown"}
                   </span>
                 </div>
-                <div className="flex justify-between border-b border-white/5 py-1">
+                <div className="flex justify-between border-b border-border/40 py-1">
                   <span className="text-muted-foreground">Audio Files</span>
                   <span className="font-mono font-medium text-foreground">
                     {book.files?.length || 1} tracks
                   </span>
                 </div>
                 {book.duration && (
-                  <div className="col-span-2 flex justify-between border-b border-white/5 py-1">
+                  <div className="col-span-2 flex justify-between border-b border-border/40 py-1">
                     <span className="text-muted-foreground">Duration</span>
                     <span className="font-mono font-medium text-foreground">{book.duration}</span>
                   </div>
                 )}
               </div>
-            </div>
+            </Card>
           </div>
         </DialogContent>
       </Dialog>

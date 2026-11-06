@@ -4,9 +4,11 @@ import React, { useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Play, Pause } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AudiobookSummary } from "@/types";
 import { useOptionalAudioPlayback, getBookProgress } from "@/features/player";
+import { cn } from "@/lib/utils";
 
 export interface BookCardProps {
   book: AudiobookSummary;
@@ -68,8 +70,10 @@ export function BookCard({ book }: BookCardProps) {
           />
         </Link>
 
-        <button
+        <Button
           type="button"
+          size="icon"
+          variant="default"
           onClick={handlePlayClick}
           aria-label={
             isPlayingCurrent
@@ -79,18 +83,19 @@ export function BookCard({ book }: BookCardProps) {
                 : `Play ${book.title}`
           }
           title={isPlayingCurrent ? "Pause" : isResume ? "Resume" : "Play"}
-          className={`absolute right-2.5 bottom-2.5 z-10 flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+          className={cn(
+            "absolute right-2.5 bottom-2.5 z-10 size-9 rounded-full shadow-md transition-all duration-200",
             isPlayingCurrent
               ? "translate-y-0 opacity-100"
-              : "translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100"
-          }`}
+              : "translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100",
+          )}
         >
           {isPlayingCurrent ? (
             <Pause size={15} fill="currentColor" />
           ) : (
             <Play size={15} fill="currentColor" className="ml-0.5" />
           )}
-        </button>
+        </Button>
       </div>
 
       <CardContent className="flex flex-1 flex-col justify-between px-0.5 pt-2.5 pb-0">

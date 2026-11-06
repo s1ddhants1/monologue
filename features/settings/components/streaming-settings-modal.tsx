@@ -43,6 +43,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useUIStore } from "@/stores/ui-store";
 import { useSettingsStore } from "../stores";
 import { hapticLight, hapticSuccess } from "@/lib/capacitor";
+import { cn } from "@/lib/utils";
 import type { AIProvider } from "@/types";
 
 export function StreamingSettingsModal() {
@@ -162,11 +163,12 @@ export function StreamingSettingsModal() {
                     void hapticLight();
                     updateSettings({ streamingMode: "browser" });
                   }}
-                  className={`flex min-h-[110px] cursor-pointer flex-col justify-between gap-0 rounded-xl border p-4 transition-all ${
+                  className={cn(
+                    "flex min-h-[110px] cursor-pointer flex-col justify-between gap-0 rounded-xl border p-4 transition-all",
                     settings.streamingMode === "browser"
-                      ? "bg-chrome-raised border-primary text-foreground"
-                      : "border-chrome-divider bg-chrome-control text-muted-foreground hover:border-border"
-                  }`}
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border bg-card text-muted-foreground hover:border-border/80",
+                  )}
                 >
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Globe size={18} className="text-primary" />
@@ -187,11 +189,12 @@ export function StreamingSettingsModal() {
                     void hapticLight();
                     updateSettings({ streamingMode: "bridge" });
                   }}
-                  className={`flex min-h-[110px] cursor-pointer flex-col justify-between gap-0 rounded-xl border p-4 transition-all ${
+                  className={cn(
+                    "flex min-h-[110px] cursor-pointer flex-col justify-between gap-0 rounded-xl border p-4 transition-all",
                     settings.streamingMode === "bridge"
-                      ? "bg-chrome-raised border-primary text-foreground"
-                      : "border-chrome-divider bg-chrome-control text-muted-foreground hover:border-border"
-                  }`}
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border bg-card text-muted-foreground hover:border-border/80",
+                  )}
                 >
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Monitor size={18} className="text-primary" />
@@ -210,7 +213,7 @@ export function StreamingSettingsModal() {
             </div>
 
             {settings.streamingMode === "bridge" && (
-              <Field className="border-chrome-divider bg-chrome-subtle space-y-2 rounded-xl border p-4">
+              <Field className="space-y-2 rounded-xl border border-border bg-muted/20 p-4">
                 <FieldLabel
                   htmlFor="bridge-url-input"
                   className="text-xs font-semibold text-foreground"
@@ -416,7 +419,7 @@ export function StreamingSettingsModal() {
 
             <Field
               orientation="horizontal"
-              className="border-chrome-divider bg-chrome-control cursor-pointer justify-between rounded-xl border p-3.5"
+              className="cursor-pointer justify-between rounded-xl border border-border bg-card p-3.5"
             >
               <FieldContent>
                 <FieldTitle className="text-sm font-semibold text-foreground">

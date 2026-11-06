@@ -37,6 +37,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "@/components/ui/empty";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { hapticLight, hapticSuccess } from "@/lib/capacitor";
@@ -811,40 +819,47 @@ export function FullscreenPlayer() {
                     })}
                   </div>
                 ) : (
-                  <div className="my-auto flex h-full flex-col items-center justify-center p-6 text-center text-muted-foreground">
-                    <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-                      {isTranscribing ? (
-                        <Loader2 size={26} className="animate-spin" />
-                      ) : (
-                        <Sparkles size={26} />
-                      )}
-                    </div>
-                    <h3 className="text-base font-bold text-foreground">
-                      {isTranscribing
-                        ? "Transcribing Audio..."
-                        : "No Transcription on the Side Yet"}
-                    </h3>
-                    <p className="mt-1 max-w-sm text-xs text-muted-foreground">
-                      {isTranscribing
-                        ? `Processing speech segments with ${settings.aiProvider.toUpperCase()} (${settings.aiModel}).`
-                        : "Generate real-time word-synchronized transcriptions for this chapter powered by AI SDK."}
-                    </p>
+                  <Empty className="my-auto max-w-sm">
+                    <EmptyHeader>
+                      <EmptyMedia
+                        variant="icon"
+                        className="size-14 rounded-2xl border border-primary/20 bg-primary/10 text-primary"
+                      >
+                        {isTranscribing ? (
+                          <Loader2 size={26} className="animate-spin" />
+                        ) : (
+                          <Sparkles size={26} />
+                        )}
+                      </EmptyMedia>
+                      <EmptyTitle>
+                        {isTranscribing
+                          ? "Transcribing Audio..."
+                          : "No Transcription on the Side Yet"}
+                      </EmptyTitle>
+                      <EmptyDescription>
+                        {isTranscribing
+                          ? `Processing speech segments with ${settings.aiProvider.toUpperCase()} (${settings.aiModel}).`
+                          : "Generate real-time word-synchronized transcriptions for this chapter powered by AI SDK."}
+                      </EmptyDescription>
+                    </EmptyHeader>
                     {transcribeError && (
-                      <p className="mt-2 max-w-xs text-xs text-destructive">{transcribeError}</p>
+                      <p className="mt-2 text-xs text-destructive">{transcribeError}</p>
                     )}
                     {!isTranscribing && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleTranscribeSide}
-                        className="mt-5 flex cursor-pointer items-center gap-2 rounded-full border-primary/40 text-xs text-primary hover:bg-primary/15"
-                      >
-                        <Sparkles size={14} />
-                        <span>Transcribe Chapter</span>
-                      </Button>
+                      <EmptyContent>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleTranscribeSide}
+                          className="mt-2 cursor-pointer gap-2 rounded-full border-primary/40 text-xs text-primary hover:bg-primary/15"
+                        >
+                          <Sparkles size={14} />
+                          <span>Transcribe Chapter</span>
+                        </Button>
+                      </EmptyContent>
                     )}
-                  </div>
+                  </Empty>
                 )}
               </div>
             </div>

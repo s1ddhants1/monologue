@@ -5,13 +5,15 @@ import Link from "next/link";
 import { Library, Compass, Trash2 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import {
   Empty,
   EmptyHeader,
@@ -76,27 +78,27 @@ export default function LibraryPage() {
         )}
       </div>
 
-      <Dialog open={isConfirmOpen} onOpenChange={(open) => !open && closeConfirm()}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="text-left">
-            <DialogTitle className="text-base font-semibold text-foreground">
+      <AlertDialog open={isConfirmOpen} onOpenChange={(open) => !open && closeConfirm()}>
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader className="text-left">
+            <AlertDialogTitle className="text-base font-semibold text-foreground">
               Clear Library Collection
-            </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-muted-foreground">
               Are you sure you want to remove all saved audiobooks from your library? This action
               cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-5 flex items-center justify-end gap-2.5">
-            <Button type="button" variant="outline" size="sm" onClick={closeConfirm}>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-5 flex items-center justify-end gap-2.5">
+            <AlertDialogCancel size="sm" onClick={closeConfirm}>
               Cancel
-            </Button>
-            <Button type="button" variant="destructive" size="sm" onClick={handleConfirmClear}>
+            </AlertDialogCancel>
+            <AlertDialogAction variant="destructive" size="sm" onClick={handleConfirmClear}>
               Clear Library
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {books.length === 0 ? (
         <Empty className="my-12 max-w-md">

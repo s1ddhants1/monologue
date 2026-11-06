@@ -129,8 +129,8 @@ export default async function BookDetailPage({ params }: BookPageProps) {
                   <Badge
                     key={cat}
                     render={<Link href={`/category/${cat.toLowerCase().replace(/\s+/g, "-")}`} />}
-                    variant="outline"
-                    className="rounded-full border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                    variant="secondary"
+                    className="cursor-pointer rounded-full transition-colors hover:bg-secondary/80"
                   >
                     {cat}
                   </Badge>
