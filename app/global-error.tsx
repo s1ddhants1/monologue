@@ -1,7 +1,17 @@
 "use client";
 
 import React from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "@/components/ui/empty";
+import { AlertCircle } from "@/components/icons";
 
 export default function GlobalError({
   error,
@@ -15,23 +25,27 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html lang="en" className="dark">
-      <body className="flex min-h-screen flex-col items-center justify-center bg-[#0b0b0b] p-8 text-center font-sans text-[#f2f2f0]">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/10">
-          <span className="text-2xl">⚠️</span>
-        </div>
-        <h2 className="mb-2 text-xl font-bold text-[#f2f2f0]">Application Error</h2>
-        <p className="mb-4 max-w-md text-sm text-[#999995]">
-          A critical error occurred in the application shell.
-        </p>
-        {error.message && (
-          <p className="mb-4 max-w-md rounded-lg border border-[#292929] bg-[#141414] px-4 py-2 font-mono text-xs text-[#999995]">
-            {error.message}
-          </p>
-        )}
-        <Button type="button" variant="default" onClick={reset}>
-          Try Again
-        </Button>
+    <html lang="en" className="dark h-full antialiased">
+      <body className="flex min-h-full flex-col items-center justify-center bg-background p-6 font-sans text-foreground">
+        <Empty className="max-w-md">
+          <EmptyHeader>
+            <EmptyMedia variant="icon" className="bg-destructive/10 text-destructive">
+              <AlertCircle size={28} />
+            </EmptyMedia>
+            <EmptyTitle>Application Error</EmptyTitle>
+            <EmptyDescription>A critical error occurred in the application shell.</EmptyDescription>
+          </EmptyHeader>
+          {error.message && (
+            <Alert variant="destructive" className="py-2 text-left">
+              <AlertDescription className="font-mono text-xs">{error.message}</AlertDescription>
+            </Alert>
+          )}
+          <EmptyContent>
+            <Button type="button" variant="default" onClick={reset}>
+              Try Again
+            </Button>
+          </EmptyContent>
+        </Empty>
       </body>
     </html>
   );

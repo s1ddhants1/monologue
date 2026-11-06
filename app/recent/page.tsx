@@ -53,7 +53,7 @@ export default function RecentPage() {
 
   return (
     <div id="page-recent">
-      <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
+      <div className="mb-6 flex items-center justify-between border-b border-border/60 pb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Recent Listening
@@ -69,7 +69,6 @@ export default function RecentPage() {
             variant="outline"
             size="sm"
             onClick={handleOpenConfirm}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
             title="Clear listening history"
           >
             <Trash2 size={14} />
@@ -104,7 +103,7 @@ export default function RecentPage() {
           <EmptyHeader>
             <EmptyMedia
               variant="icon"
-              className="h-14 w-14 rounded-2xl border border-white/10 bg-white/5 text-muted-foreground"
+              className="size-14 rounded-2xl border border-border/60 bg-muted/40 text-muted-foreground"
             >
               <History size={28} />
             </EmptyMedia>

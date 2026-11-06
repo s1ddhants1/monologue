@@ -120,7 +120,7 @@ export function TracklistInspector({ book: propBook, isDrawer = false }: Trackli
               role="button"
               aria-label={`${isCurrent && isPlaying ? "Pause" : "Play"} ${displayName}`}
               className={cn(
-                "group/song cursor-pointer transition-colors hover:bg-white/5",
+                "group/song cursor-pointer transition-colors hover:bg-muted/50",
                 isCurrent &&
                   "border-l-2 border-primary bg-secondary/80 font-medium text-foreground",
               )}

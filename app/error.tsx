@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -36,9 +37,9 @@ export default function GlobalError({
           </EmptyDescription>
         </EmptyHeader>
         {error.message && (
-          <p className="bg-chrome-subtle rounded-lg border border-border px-4 py-2 font-mono text-xs text-muted-foreground">
-            {error.message}
-          </p>
+          <Alert variant="destructive" className="py-2 text-left">
+            <AlertDescription className="font-mono text-xs">{error.message}</AlertDescription>
+          </Alert>
         )}
         <EmptyContent>
           <Button type="button" variant="default" onClick={reset}>

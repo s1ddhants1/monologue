@@ -28,6 +28,7 @@ import { useTranscriptionStore, transcribeAudio } from "@/features/transcription
 import { composeSegments, type TranscriptWord } from "@/hooks/use-transcript-viewer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -328,7 +329,7 @@ export function FullscreenPlayer() {
           showControls ? "opacity-100" : "opacity-0 hover:opacity-100",
         )}
       >
-        <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-2 py-1 backdrop-blur-xl">
+        <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-border/60 bg-background/80 px-2 py-1 backdrop-blur-xl">
           {currentBook.infoHash && (
             <Button
               type="button"
@@ -343,7 +344,7 @@ export function FullscreenPlayer() {
                 "h-8 w-8 cursor-pointer rounded-full transition-colors",
                 sidePanel === "transcript"
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-white/10 hover:text-foreground",
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
             >
               <FileText size={16} />
@@ -364,7 +365,7 @@ export function FullscreenPlayer() {
                 "h-8 w-8 cursor-pointer rounded-full transition-colors",
                 isTracklistOpen
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-white/10 hover:text-foreground",
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
             >
               <List size={16} />
@@ -393,7 +394,7 @@ export function FullscreenPlayer() {
         >
           <div
             className={cn(
-              "flex min-w-0 flex-col items-center justify-center space-y-4 text-center transition-all duration-300 sm:space-y-5",
+              "flex min-w-0 flex-col items-center justify-center gap-4 text-center transition-all duration-300 sm:gap-5",
               isSidePanelActive
                 ? "w-full shrink-0 lg:w-[420px] xl:w-[460px]"
                 : "mx-auto w-full max-w-[460px]",
@@ -407,7 +408,7 @@ export function FullscreenPlayer() {
                 height={400}
                 priority
                 className={cn(
-                  "rounded-3xl border border-white/15 object-cover",
+                  "rounded-3xl border border-border/60 object-cover",
                   isSidePanelActive
                     ? "size-44 sm:size-52 lg:size-56 xl:size-60"
                     : "size-56 sm:size-64 md:size-72 lg:size-80",
@@ -415,7 +416,7 @@ export function FullscreenPlayer() {
               />
             </div>
 
-            <div className="w-full max-w-md space-y-1">
+            <div className="flex w-full max-w-md flex-col gap-1">
               <h1 className="line-clamp-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl lg:text-3xl">
                 <Link
                   href={`/book/${currentBook.id}`}
@@ -501,7 +502,7 @@ export function FullscreenPlayer() {
               </Button>
             </div>
 
-            <div className="w-full max-w-md space-y-1.5">
+            <div className="flex w-full max-w-md flex-col gap-1.5">
               <Slider
                 value={[currentTime]}
                 max={duration > 0 ? duration : 100}
@@ -534,7 +535,7 @@ export function FullscreenPlayer() {
                         variant="ghost"
                         size="sm"
                         title={`Speed: ${playbackRate}x`}
-                        className="h-8 cursor-pointer rounded-lg px-2.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                        className="h-8 cursor-pointer rounded-lg px-2.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                       />
                     }
                   >
@@ -587,7 +588,7 @@ export function FullscreenPlayer() {
                           "h-8 cursor-pointer rounded-lg px-2.5 text-xs transition-colors",
                           sleepTimerRemaining || sleepOnChapterEnd
                             ? "bg-primary/20 text-primary"
-                            : "text-muted-foreground hover:bg-white/10 hover:text-foreground",
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                         )}
                       />
                     }
@@ -698,7 +699,7 @@ export function FullscreenPlayer() {
                   size="icon"
                   onClick={toggleMute}
                   title={isMuted ? "Unmute" : "Mute"}
-                  className="size-8 cursor-pointer rounded-full text-muted-foreground hover:bg-white/10 hover:text-foreground"
+                  className="size-8 cursor-pointer rounded-full text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
                   {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
                 </Button>
@@ -718,11 +719,11 @@ export function FullscreenPlayer() {
           </div>
 
           {currentBook.infoHash && sidePanel === "transcript" && (
-            <div
+            <Card
               id="fad-lyrics-plus-container"
-              className="flex h-full max-h-[50vh] min-h-0 w-full flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:p-7 lg:max-h-full lg:w-auto"
+              className="flex h-full max-h-[50vh] min-h-0 w-full flex-1 flex-col overflow-hidden rounded-3xl border border-border/80 bg-card/60 p-5 backdrop-blur-xl sm:p-7 lg:max-h-full lg:w-auto"
             >
-              <div className="flex shrink-0 items-center justify-between border-b border-white/10 pb-3.5">
+              <div className="flex shrink-0 items-center justify-between border-b border-border/60 pb-3.5">
                 <div className="flex items-center gap-2">
                   <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-foreground uppercase">
                     <Sparkles size={15} className="text-primary" />
@@ -767,7 +768,7 @@ export function FullscreenPlayer() {
                       setSidePanel("none");
                     }}
                     title="Hide Transcriptions (L)"
-                    className="h-7 w-7 cursor-pointer rounded-full text-muted-foreground hover:bg-white/10 hover:text-foreground"
+                    className="h-7 w-7 cursor-pointer rounded-full text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   >
                     <Minimize2 size={13} />
                   </Button>
@@ -779,13 +780,13 @@ export function FullscreenPlayer() {
                 className="mt-4 min-h-0 flex-1 overflow-y-auto pr-3 select-text"
               >
                 {currentTranscript && segments.length > 0 ? (
-                  <div className="space-y-1 py-4 text-lg leading-relaxed font-bold tracking-normal sm:text-xl lg:text-2xl">
+                  <div className="py-4 text-lg leading-relaxed font-bold tracking-normal sm:text-xl lg:text-2xl">
                     {segments.map((segment) => {
                       if (segment.kind === "gap") {
                         return (
                           <span
                             key={`gap-${segment.segmentIndex}`}
-                            className="whitespace-pre text-white/20"
+                            className="whitespace-pre text-muted-foreground/30"
                           >
                             {segment.text}
                           </span>
@@ -809,8 +810,10 @@ export function FullscreenPlayer() {
                             isCurrent && "bg-primary/20 font-bold text-primary",
                             isSpoken &&
                               !isCurrent &&
-                              "text-foreground/90 hover:bg-white/5 hover:text-foreground",
-                            !isSpoken && !isCurrent && "text-white/35 hover:text-white/70",
+                              "text-foreground/90 hover:bg-accent hover:text-accent-foreground",
+                            !isSpoken &&
+                              !isCurrent &&
+                              "text-muted-foreground/50 hover:text-foreground",
                           )}
                         >
                           {word.text}
@@ -862,7 +865,7 @@ export function FullscreenPlayer() {
                   </Empty>
                 )}
               </div>
-            </div>
+            </Card>
           )}
         </div>
       </main>

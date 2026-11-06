@@ -151,9 +151,9 @@ export function StreamingSettingsModal() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 pt-2 pr-1">
+        <div className="flex flex-col gap-6 pt-2 pr-1">
           <FieldGroup>
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 Playback Engine
               </span>
@@ -213,7 +213,7 @@ export function StreamingSettingsModal() {
             </div>
 
             {settings.streamingMode === "bridge" && (
-              <Field className="space-y-2 rounded-xl border border-border bg-muted/20 p-4">
+              <Field className="flex flex-col gap-2 rounded-xl border border-border bg-muted/20 p-4">
                 <FieldLabel
                   htmlFor="bridge-url-input"
                   className="text-xs font-semibold text-foreground"
@@ -265,7 +265,7 @@ export function StreamingSettingsModal() {
 
           <Separator />
 
-          <div className="space-y-3 pt-1">
+          <div className="flex flex-col gap-3 pt-1">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 <Sparkles size={14} className="text-primary" />
@@ -274,7 +274,7 @@ export function StreamingSettingsModal() {
               <span className="font-mono text-[11px] text-muted-foreground">ai-sdk.dev</span>
             </div>
 
-            <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
+            <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/20 p-4">
               <Field>
                 <FieldLabel className="mb-2 block text-xs font-medium text-foreground">
                   AI Provider
@@ -299,7 +299,7 @@ export function StreamingSettingsModal() {
                 </ToggleGroup>
               </Field>
 
-              <Field className="space-y-1.5">
+              <Field className="flex flex-col gap-1.5">
                 <FieldLabel className="flex items-center gap-1 text-xs font-medium text-foreground">
                   <Key size={13} className="text-primary" />
                   <span>API Key</span>
@@ -330,7 +330,7 @@ export function StreamingSettingsModal() {
                 </FieldDescription>
               </Field>
 
-              <Field className="space-y-1.5">
+              <Field className="flex flex-col gap-1.5">
                 <FieldLabel className="text-xs font-medium text-foreground">Model Name</FieldLabel>
                 <Input
                   type="text"
@@ -366,7 +366,7 @@ export function StreamingSettingsModal() {
               </Field>
 
               {(settings.aiProvider === "custom" || settings.aiProvider === "groq") && (
-                <Field className="space-y-1.5">
+                <Field className="flex flex-col gap-1.5">
                   <FieldLabel className="text-xs font-medium text-foreground">
                     Custom Base URL
                   </FieldLabel>
@@ -412,7 +412,7 @@ export function StreamingSettingsModal() {
 
           <Separator />
 
-          <div className="space-y-3 pt-1">
+          <div className="flex flex-col gap-3 pt-1">
             <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
               Playback Preferences
             </span>

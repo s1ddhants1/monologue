@@ -426,10 +426,7 @@ export function SettingsView() {
         description:
           "Open-source, privacy-respecting, ad-free audiobook player inspired by Monochrome",
         component: (
-          <Badge
-            variant="outline"
-            className="border-white/10 bg-white/10 font-mono text-xs font-medium text-foreground"
-          >
+          <Badge variant="secondary" className="font-mono text-xs font-medium">
             v1.0.0
           </Badge>
         ),
@@ -506,7 +503,7 @@ export function SettingsView() {
         onSubmit={(e) => e.preventDefault()}
         role="search"
       >
-        <InputGroup className="bg-chrome-control focus-within:bg-chrome-control-hover hover:bg-chrome-control-hover h-10 w-full rounded-lg border-border transition-all focus-within:border-ring">
+        <InputGroup className="h-10 w-full rounded-lg border-border bg-muted/40 transition-all focus-within:border-ring focus-within:bg-muted/60 hover:bg-muted/50">
           <InputGroupAddon align="inline-start">
             <Search size={18} className="text-muted-foreground" />
           </InputGroupAddon>

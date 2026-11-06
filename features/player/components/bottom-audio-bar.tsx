@@ -150,7 +150,7 @@ export function BottomAudioBar() {
 
   return (
     <footer
-      className="fixed inset-x-3 bottom-3 z-40 flex flex-col overflow-hidden rounded-2xl border border-white/12 bg-background/95 backdrop-blur-2xl transition-all duration-200 sm:inset-x-6 sm:bottom-4 md:right-6 md:bottom-5 md:left-[calc(var(--sidebar-width,15rem)+1.5rem)] lg:mx-auto lg:max-w-5xl"
+      className="fixed inset-x-3 bottom-3 z-40 flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-background/95 backdrop-blur-2xl transition-all duration-200 sm:inset-x-6 sm:bottom-4 md:right-6 md:bottom-5 md:left-[calc(var(--sidebar-width,15rem)+1.5rem)] lg:mx-auto lg:max-w-5xl"
       role="region"
       aria-label="Audio player"
     >
@@ -162,7 +162,7 @@ export function BottomAudioBar() {
             setFullscreenOpen(true);
           }}
         >
-          <div className="relative size-11 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-muted/30 sm:size-12">
+          <div className="relative size-11 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted/30 sm:size-12">
             <Image
               src={currentBook.cover || "/placeholder-cover.svg"}
               alt={currentBook.title}
@@ -540,7 +540,7 @@ export function BottomAudioBar() {
 
       <div
         id="mobile-progress-bar"
-        className="relative h-1 w-full cursor-pointer overflow-hidden bg-white/10 md:hidden"
+        className="relative h-1 w-full cursor-pointer overflow-hidden bg-muted md:hidden"
         role="progressbar"
         aria-valuenow={Math.round(currentTime)}
         aria-valuemin={0}

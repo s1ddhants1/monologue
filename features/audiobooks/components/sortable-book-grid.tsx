@@ -78,7 +78,7 @@ export function SortableBookGrid({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <div className="flex flex-col justify-between gap-3 pt-1 pb-2 sm:flex-row sm:items-center">
         <div className="font-mono text-xs text-muted-foreground">
           {sortedBooks.length} {sortedBooks.length === 1 ? "release" : "releases"}

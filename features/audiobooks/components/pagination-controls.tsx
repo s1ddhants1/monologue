@@ -73,7 +73,7 @@ export function PaginationControls({
     currentPage < totalPages ? buildPageUrl(baseUrl, currentPage + 1, queryParams) : null;
 
   return (
-    <Pagination className="pagination-controls mt-8 border-t border-white/5 pt-4 select-none">
+    <Pagination className="pagination-controls mt-8 border-t border-border/40 pt-4 select-none">
       <PaginationContent className="w-full justify-between sm:justify-center">
         <PaginationItem>
           <PaginationPrevious

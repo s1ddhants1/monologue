@@ -193,7 +193,7 @@ export function TranscriptDialog() {
               : "Synchronized AI transcript"}
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 pt-1">
+        <div className="flex flex-col gap-4 pt-1">
           {error && (
             <Alert variant="destructive">
               <AlertCircle size={16} />
@@ -203,7 +203,7 @@ export function TranscriptDialog() {
           )}
 
           {cached ? (
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between border-b border-border/60 pb-2">
                 <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
                   <Sparkles size={14} className="text-primary" />
@@ -250,7 +250,7 @@ export function TranscriptDialog() {
 
               <Card className="gap-0 border-border/80 bg-background/50 p-4">
                 <ScrollArea className="max-h-[46vh] pr-3 select-text">
-                  <div className="space-y-1 text-base leading-relaxed tracking-normal">
+                  <div className="text-base leading-relaxed tracking-normal">
                     {segments.map((segment) => {
                       if (segment.kind === "gap") {
                         return (
@@ -337,14 +337,14 @@ export function TranscriptDialog() {
               </Card>
             </div>
           ) : isLoading ? (
-            <div className="flex flex-col items-center justify-center space-y-4 py-16 text-center">
+            <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
               <div className="relative">
                 <div className="flex h-14 w-14 animate-pulse items-center justify-center rounded-2xl border border-primary/20 bg-primary/10">
                   <Sparkles className="size-7 text-primary" />
                 </div>
                 <Loader2 className="absolute -right-1 -bottom-1 size-6 animate-spin text-primary" />
               </div>
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <h4 className="text-sm font-semibold text-foreground">
                   Transcribing Audio with AI...
                 </h4>
@@ -355,7 +355,7 @@ export function TranscriptDialog() {
               </div>
             </div>
           ) : (
-            <div className="space-y-5 py-6">
+            <div className="flex flex-col gap-5 py-6">
               <Empty className="py-2">
                 <EmptyHeader>
                   <EmptyMedia className="size-12 rounded-2xl border border-primary/20 bg-primary/10 text-primary">

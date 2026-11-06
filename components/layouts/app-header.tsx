@@ -70,7 +70,7 @@ export function AppHeader() {
 
       <div className="mx-auto flex max-w-[480px] flex-1 justify-center">
         <form className="flex w-full items-center" id="search-form" onSubmit={handleSearchSubmit}>
-          <InputGroup className="h-9 w-full rounded-lg border-transparent bg-white/5 transition-all focus-within:border-white/15 focus-within:bg-white/10 hover:bg-white/8">
+          <InputGroup className="h-9 w-full rounded-lg border-border/60 bg-muted/40 transition-all focus-within:border-ring focus-within:bg-muted/70 hover:bg-muted/50">
             <InputGroupAddon align="inline-start">
               <Search size={15} className="text-muted-foreground" />
             </InputGroupAddon>

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Clock, BookOpen, ListMusic, Sparkles } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   getAudiobookDetail,
@@ -70,10 +71,10 @@ export default async function BookDetailPage({ params }: BookPageProps) {
 
   return (
     <div className="pb-8" id="page-album">
-      <header className="relative my-4 overflow-hidden rounded-3xl border border-white/10 bg-card p-6 sm:p-8 md:p-10">
+      <Card className="relative my-4 overflow-hidden rounded-3xl border border-border/80 bg-card p-6 sm:p-8 md:p-10">
         <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8 md:flex-row md:items-end md:gap-10">
           <div className="relative shrink-0">
-            <div className="size-44 overflow-hidden rounded-2xl border border-white/15 bg-muted/30 sm:size-52 md:size-60">
+            <div className="size-44 overflow-hidden rounded-2xl border border-border/60 bg-muted/30 sm:size-52 md:size-60">
               <Image
                 src={book.cover || "/placeholder-cover.svg"}
                 alt={book.title}
@@ -145,9 +146,9 @@ export default async function BookDetailPage({ params }: BookPageProps) {
             </div>
           </div>
         </div>
-      </header>
+      </Card>
 
-      <div className="mt-8 space-y-10">
+      <div className="mt-8 flex flex-col gap-10">
         <Tabs defaultValue="tracks" className="w-full">
           <TabsList className="mb-6 grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="tracks" className="cursor-pointer gap-2">
@@ -160,7 +161,7 @@ export default async function BookDetailPage({ params }: BookPageProps) {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="tracks" className="space-y-4">
+          <TabsContent value="tracks" className="flex flex-col gap-4">
             <section className="track-list-section" id="album-section-tracks">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
@@ -174,7 +175,7 @@ export default async function BookDetailPage({ params }: BookPageProps) {
             </section>
           </TabsContent>
 
-          <TabsContent value="synopsis" className="space-y-4">
+          <TabsContent value="synopsis" className="flex flex-col gap-4">
             <section className="content-section" id="album-section-synopsis">
               <h2 className="mb-3 text-lg font-bold tracking-tight text-foreground sm:text-xl">
                 Synopsis &amp; Details

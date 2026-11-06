@@ -103,7 +103,9 @@ export function BookSynopsis({ description }: BookSynopsisProps) {
   if (!isLong) {
     return (
       <div className="max-w-3xl text-sm leading-relaxed text-foreground/90">
-        <div className="space-y-3">{paragraphs.map((para, idx) => renderParagraph(para, idx))}</div>
+        <div className="flex flex-col gap-3">
+          {paragraphs.map((para, idx) => renderParagraph(para, idx))}
+        </div>
       </div>
     );
   }
@@ -112,7 +114,7 @@ export function BookSynopsis({ description }: BookSynopsisProps) {
     <div className="max-w-3xl text-sm leading-relaxed text-foreground/90">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <div
-          className={`space-y-3 transition-[max-height] duration-300 ${
+          className={`flex flex-col gap-3 transition-[max-height] duration-300 ${
             !isExpanded ? "relative max-h-36 overflow-hidden" : "max-h-none"
           }`}
         >
