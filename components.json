@@ -23,6 +23,9 @@
   "menuAccent": "subtle",
   "registries": {
     "@blode": "https://blode.co/ui/r/{name}.json",
-    "@audiocn": "https://www.audiocn.dev/r/{name}.json"
+    "@audiocn": "https://www.audiocn.dev/r/{name}.json",
+    "@cardcn": "https://cardcn.dev/r/{name}.json",
+    "@delta": "https://deltacomponents.dev/r/{name}.json",
+    "@waves-cn": "https://waves-cn.vercel.app/r/{name}.json"
   }
 }

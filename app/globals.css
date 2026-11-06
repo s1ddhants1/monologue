@@ -64,6 +64,12 @@
   --meter-ok-foreground: var(--meter-ok-foreground);
   --channel-mute: var(--channel-mute);
   --meter-clip: var(--meter-clip);
+  --color-hover: var(--hover);
+  --color-active: var(--active);
+  --color-selected: var(--selected);
+  --color-destructive-light: var(--destructive-light);
+  --color-focus-ring: var(--focus-ring);
+  --overlay: var(--overlay);
 }
 
 :root {
@@ -111,6 +117,12 @@
   --channel-mute-foreground: color-mix(in oklch, var(--channel-mute), black 40%);
   --channel-solo-foreground: color-mix(in oklch, var(--channel-solo), black 40%);
   --channel-monitor-foreground: color-mix(in oklch, var(--channel-monitor), black 40%);
+  --hover: rgb(0 0 0 / 0.04);
+  --active: rgb(0 0 0 / 0.07);
+  --selected: #d4d4d4;
+  --destructive-light: #fef2f2;
+  --overlay: 0 0 0;
+  --focus-ring: #6b97ff;
 }
 
 .dark {
@@ -157,6 +169,11 @@
   --channel-mute-foreground: var(--channel-mute);
   --channel-solo-foreground: var(--channel-solo);
   --channel-monitor-foreground: var(--channel-monitor);
+  --hover: rgb(255 255 255 / 0.06);
+  --active: rgb(255 255 255 / 0.1);
+  --selected: #525252;
+  --destructive-light: #450a0a;
+  --overlay: 255 255 255;
 }
 
 @layer base {
@@ -168,6 +185,14 @@
   }
   html {
     @apply font-sans;
+  }
+  :focus-visible {
+    outline: 1px solid var(--focus-ring, #6b97ff);
+    outline-offset: 2px;
+    border-radius: var(--radius-input, 8px);
+  }
+  a:focus-visible {
+    border-radius: 2px;
   }
 }
 
