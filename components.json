@@ -21,7 +21,5 @@
   },
   "menuColor": "default",
   "menuAccent": "subtle",
-  "registries": {
-    "@elevenlabs": "https://raw.githubusercontent.com/elevenlabs/ui/main/apps/www/public/r/{name}.json"
-  }
+  "registries": {}
 }
