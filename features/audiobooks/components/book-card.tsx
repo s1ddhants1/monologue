@@ -55,18 +55,29 @@ export function BookCard({ book }: BookCardProps) {
 
   return (
     <Card className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-card p-2.5 transition-colors hover:border-border">
-      <AspectRatio ratio={1} className="w-full overflow-hidden rounded-xl bg-muted/40">
+      <AspectRatio
+        ratio={1}
+        className="relative flex items-center justify-center overflow-hidden rounded-xl bg-muted/40"
+      >
+        <Image
+          src={coverSrc}
+          alt=""
+          fill
+          sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 240px"
+          className="pointer-events-none scale-110 object-cover opacity-25 blur-xl"
+          aria-hidden="true"
+        />
         <Link
           href={`/book/${book.id}`}
-          className="block h-full w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="relative z-10 flex h-full w-full items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label={`View details for ${book.title}`}
         >
           <Image
             src={coverSrc}
             alt={book.title}
-            width={320}
-            height={320}
-            className="h-full w-full object-cover"
+            fill
+            sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 240px"
+            className="size-full object-contain p-1 drop-shadow-sm"
             loading="lazy"
           />
         </Link>
@@ -85,7 +96,7 @@ export function BookCard({ book }: BookCardProps) {
           }
           title={isPlayingCurrent ? "Pause" : isResume ? "Resume" : "Play"}
           className={cn(
-            "absolute right-2.5 bottom-2.5 z-10 size-9 rounded-full shadow-md transition-all duration-200",
+            "absolute right-2.5 bottom-2.5 z-20 size-9 rounded-full shadow-md transition-all duration-200",
             isPlayingCurrent
               ? "translate-y-0 opacity-100"
               : "translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100",

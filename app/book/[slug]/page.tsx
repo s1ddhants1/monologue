@@ -3,19 +3,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Clock, BookOpen, ListMusic, Sparkles } from "@/components/icons";
+import { Clock, BookOpen, ListMusic } from "@/components/icons";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   getAudiobookDetail,
-  getCategoryAudiobooks,
   BookSynopsis,
   TracklistInspector,
   BookmarkButton,
   BookActionsMenu,
-  BookCard,
 } from "@/features/audiobooks";
 import { PlayBookButton } from "@/features/player";
 
@@ -57,19 +55,6 @@ export default async function BookDetailPage({ params }: BookPageProps) {
     notFound();
   }
 
-  const primaryCategory = book.categories?.[0];
-  const categoryData = primaryCategory
-    ? await getCategoryAudiobooks(primaryCategory.toLowerCase().replace(/\s+/g, "-"), 1).catch(
-        () => ({
-          results: [],
-        }),
-      )
-    : { results: [] };
-
-  const similarBooks = (categoryData.results || [])
-    .filter((b) => b.id !== book.id && b.title.toLowerCase() !== book.title.toLowerCase())
-    .slice(0, 6);
-
   return (
     <div className="pb-8" id="page-album">
       <Card className="relative my-4 overflow-hidden rounded-3xl border border-border/80 bg-card p-6 sm:p-8 md:p-10">
@@ -78,15 +63,23 @@ export default async function BookDetailPage({ params }: BookPageProps) {
             <div className="w-44 sm:w-52 md:w-60">
               <AspectRatio
                 ratio={1}
-                className="overflow-hidden rounded-2xl border border-border/60 bg-muted/30"
+                className="relative flex items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted/30"
               >
                 <Image
                   src={book.cover || "/placeholder-cover.svg"}
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 176px, (max-width: 768px) 208px, 240px"
+                  className="pointer-events-none scale-110 object-cover opacity-25 blur-2xl"
+                  aria-hidden="true"
+                />
+                <Image
+                  src={book.cover || "/placeholder-cover.svg"}
                   alt={book.title}
-                  width={300}
-                  height={300}
+                  fill
+                  sizes="(max-width: 640px) 176px, (max-width: 768px) 208px, 240px"
                   priority
-                  className="h-full w-full object-cover"
+                  className="relative z-10 size-full object-contain p-1.5 drop-shadow-md"
                 />
               </AspectRatio>
             </div>
@@ -196,32 +189,6 @@ export default async function BookDetailPage({ params }: BookPageProps) {
             </section>
           </TabsContent>
         </Tabs>
-
-        {similarBooks.length > 0 && (
-          <section className="content-section pt-4" id="album-section-similar-albums">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles size={18} className="text-primary" />
-                <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
-                  Similar Audiobooks
-                </h2>
-              </div>
-              {primaryCategory && (
-                <Link
-                  href={`/category/${primaryCategory.toLowerCase().replace(/\s+/g, "-")}`}
-                  className="text-xs font-semibold text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Explore {primaryCategory} &rarr;
-                </Link>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              {similarBooks.map((b) => (
-                <BookCard key={b.id} book={b} />
-              ))}
-            </div>
-          </section>
-        )}
       </div>
     </div>
   );

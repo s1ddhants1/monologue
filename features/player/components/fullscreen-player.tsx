@@ -109,7 +109,7 @@ export function FullscreenPlayer() {
           break;
         case "ArrowRight":
           e.preventDefault();
-          skipForward(30);
+          skipForward(15);
           break;
         case "KeyM":
           e.preventDefault();
@@ -283,14 +283,22 @@ export function FullscreenPlayer() {
           <div className="relative mb-8 w-48 shrink-0 sm:w-64 md:w-72 lg:w-80">
             <AspectRatio
               ratio={1}
-              className="overflow-hidden rounded-3xl border border-border/80 bg-muted/40 shadow-2xl"
+              className="relative flex items-center justify-center overflow-hidden rounded-3xl border border-border/80 bg-muted/40 shadow-2xl"
             >
+              <Image
+                src={currentBook.cover || "/placeholder-cover.svg"}
+                alt=""
+                fill
+                sizes="(max-width: 640px) 192px, (max-width: 768px) 256px, 320px"
+                className="pointer-events-none scale-110 object-cover opacity-25 blur-2xl"
+                aria-hidden="true"
+              />
               <Image
                 src={currentBook.cover || "/placeholder-cover.svg"}
                 alt={currentBook.title}
                 fill
                 sizes="(max-width: 640px) 192px, (max-width: 768px) 256px, 320px"
-                className="object-cover"
+                className="relative z-10 size-full object-contain p-2 drop-shadow-xl"
                 priority
               />
             </AspectRatio>
@@ -324,7 +332,7 @@ export function FullscreenPlayer() {
               canNextTrack={currentTrackIndex < totalFiles - 1}
               onTogglePlayPause={togglePlayPause}
               onSkipBackward={() => skipBackward(15)}
-              onSkipForward={() => skipForward(30)}
+              onSkipForward={() => skipForward(15)}
               onPrevTrack={prevTrack}
               onNextTrack={nextTrack}
               size="large"
@@ -340,14 +348,6 @@ export function FullscreenPlayer() {
 
             <div className="flex w-full max-w-md items-center justify-between pt-1">
               <div className="flex items-center gap-2">
-                <SpeedMenu
-                  playbackRate={playbackRate}
-                  onSelectRate={setPlaybackRate}
-                  align="start"
-                  size="sm"
-                  className="h-8 rounded-lg px-2.5 font-mono text-xs text-muted-foreground"
-                />
-
                 <SleepTimerMenu
                   sleepTimerRemaining={sleepTimerRemaining}
                   sleepOnChapterEnd={sleepOnChapterEnd}
@@ -357,6 +357,14 @@ export function FullscreenPlayer() {
                   size="sm"
                   align="start"
                   className="h-8 rounded-lg px-2.5 text-xs text-muted-foreground"
+                />
+
+                <SpeedMenu
+                  playbackRate={playbackRate}
+                  onSelectRate={setPlaybackRate}
+                  align="start"
+                  size="sm"
+                  className="h-8 rounded-lg px-2.5 font-mono text-xs text-muted-foreground"
                 />
               </div>
 

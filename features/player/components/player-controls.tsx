@@ -111,7 +111,7 @@ export function PlayerControls({
         variant="ghost"
         size="icon"
         onClick={onSkipForward}
-        title="Jump forward 30s"
+        title="Jump forward 15s"
         className={cn(isLarge ? "size-10" : "hidden sm:inline-flex")}
       >
         <RotateCw size={isLarge ? 18 : 15} />

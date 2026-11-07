@@ -116,13 +116,21 @@ export function BottomAudioBar() {
             setFullscreenOpen(true);
           }}
         >
-          <div className="relative size-11 shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted/30 sm:size-12">
+          <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-muted/30 sm:size-12">
+            <Image
+              src={currentBook.cover || "/placeholder-cover.svg"}
+              alt=""
+              fill
+              sizes="48px"
+              className="pointer-events-none scale-125 object-cover opacity-25 blur-md"
+              aria-hidden="true"
+            />
             <Image
               src={currentBook.cover || "/placeholder-cover.svg"}
               alt={currentBook.title}
-              width={48}
-              height={48}
-              className="h-full w-full object-cover"
+              fill
+              sizes="48px"
+              className="relative z-10 size-full object-contain p-0.5"
             />
           </div>
           <div className="flex min-w-0 flex-col justify-center">
@@ -162,19 +170,36 @@ export function BottomAudioBar() {
         </div>
 
         <div className="flex shrink-0 items-center justify-center sm:mx-auto sm:max-w-md sm:flex-1 sm:flex-col">
-          <PlayerControls
-            isPlaying={isPlaying}
-            isLoading={isLoading}
-            isMultiPart={isMultiPart}
-            canPrevTrack={currentTrackIndex > 0}
-            canNextTrack={currentTrackIndex < totalFiles - 1}
-            onTogglePlayPause={togglePlayPause}
-            onSkipBackward={() => skipBackward(15)}
-            onSkipForward={() => skipForward(30)}
-            onPrevTrack={prevTrack}
-            onNextTrack={nextTrack}
-            size="compact"
-          />
+          <div className="flex items-center gap-1 sm:gap-2">
+            <PlayerControls
+              isPlaying={isPlaying}
+              isLoading={isLoading}
+              isMultiPart={isMultiPart}
+              canPrevTrack={currentTrackIndex > 0}
+              canNextTrack={currentTrackIndex < totalFiles - 1}
+              onTogglePlayPause={togglePlayPause}
+              onSkipBackward={() => skipBackward(15)}
+              onSkipForward={() => skipForward(15)}
+              onPrevTrack={prevTrack}
+              onNextTrack={nextTrack}
+              size="compact"
+            />
+            <SleepTimerMenu
+              sleepTimerRemaining={sleepTimerRemaining}
+              sleepOnChapterEnd={sleepOnChapterEnd}
+              isMultiPart={isMultiPart}
+              onStartTimer={startSleepTimer}
+              onCancelTimer={cancelSleepTimer}
+              size="icon-sm"
+              align="end"
+            />
+            <SpeedMenu
+              playbackRate={playbackRate}
+              onSelectRate={setPlaybackRate}
+              align="end"
+              size="icon-sm"
+            />
+          </div>
           <div className="hidden w-full md:block">
             <TrackScrubber
               currentTime={currentTime}
@@ -187,13 +212,6 @@ export function BottomAudioBar() {
 
         <div className="hidden shrink-0 items-center justify-end gap-1 sm:flex sm:w-60 sm:flex-col sm:items-end sm:justify-center md:w-64">
           <div className="flex items-center justify-end gap-1">
-            <SpeedMenu
-              playbackRate={playbackRate}
-              onSelectRate={setPlaybackRate}
-              align="end"
-              size="icon-sm"
-            />
-
             {currentBook.infoHash && (
               <TranscriptButton
                 trackKey={`${currentBook.infoHash}-${currentTrackIndex}`}
@@ -222,16 +240,6 @@ export function BottomAudioBar() {
             >
               <Download size={16} />
             </Button>
-
-            <SleepTimerMenu
-              sleepTimerRemaining={sleepTimerRemaining}
-              sleepOnChapterEnd={sleepOnChapterEnd}
-              isMultiPart={isMultiPart}
-              onStartTimer={startSleepTimer}
-              onCancelTimer={cancelSleepTimer}
-              size="icon-sm"
-              align="end"
-            />
 
             <Button
               type="button"

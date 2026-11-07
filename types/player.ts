@@ -28,7 +28,7 @@ export interface PlayerSettings {
 
 export const DEFAULT_SETTINGS: PlayerSettings = {
   defaultPlaybackRate: 1.0,
-  skipForwardSeconds: 30,
+  skipForwardSeconds: 15,
   skipBackwardSeconds: 15,
   autoAdvanceTracks: true,
   theme: "monochrome",
