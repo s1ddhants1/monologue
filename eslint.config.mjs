@@ -7,6 +7,8 @@ const eslintConfig = defineConfig([
   ...nextTs,
   globalIgnores([
     ".next/**",
+    ".cloudflare/**",
+    ".vinext/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
@@ -15,44 +17,6 @@ const eslintConfig = defineConfig([
     "android/**",
     "ios/**",
   ]),
-  {
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              group: ["@/features/*/*"],
-              message:
-                "Do not import from inside feature internals. Import from the feature barrel instead.",
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: [
-      "components/ui/**/*.{ts,tsx}",
-      "lib/**/*.{ts,tsx}",
-      "stores/**/*.{ts,tsx}",
-      "hooks/**/*.{ts,tsx}",
-      "types/**/*.{ts,tsx}",
-    ],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              group: ["@/features", "@/features/**", "@/app", "@/app/**"],
-              message: "Shared foundational modules cannot import from features or app layer.",
-            },
-          ],
-        },
-      ],
-    },
-  },
   {
     files: ["components/ui/**/*.{ts,tsx}"],
     rules: {

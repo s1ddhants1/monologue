@@ -2,7 +2,6 @@ import React from "react";
 import type { Metadata } from "next";
 import {
   getCategoryAudiobooks,
-  POPULAR_CATEGORIES,
   CategoryPills,
   SortableBookGrid,
   SortOption,
@@ -11,6 +10,7 @@ import {
   isSortDirection,
   isSortOption,
 } from "@/features/audiobooks";
+import { POPULAR_CATEGORIES } from "@/types";
 import { parsePage } from "@/lib/request-params";
 
 export const revalidate = 600;

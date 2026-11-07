@@ -1,5 +1,3 @@
-export type StreamingMode = "browser" | "bridge" | "external";
-
 export interface StreamStatus {
   state: "idle" | "connecting" | "downloading" | "ready" | "error";
   peers: number;
@@ -9,9 +7,9 @@ export interface StreamStatus {
   activeFileName?: string;
 }
 
+export type AIProvider = "openai" | "groq" | "custom";
+
 export interface PlayerSettings {
-  streamingMode: StreamingMode;
-  bridgeUrl: string;
   defaultPlaybackRate: number;
   skipForwardSeconds: number;
   skipBackwardSeconds: number;
@@ -24,13 +22,11 @@ export interface PlayerSettings {
   aiApiKey: string;
   aiModel: string;
   aiBaseUrl: string;
+  streamingMode?: string;
+  bridgeUrl?: string;
 }
 
-export type AIProvider = "openai" | "groq" | "custom";
-
 export const DEFAULT_SETTINGS: PlayerSettings = {
-  streamingMode: "browser",
-  bridgeUrl: "http://localhost:8888",
   defaultPlaybackRate: 1.0,
   skipForwardSeconds: 30,
   skipBackwardSeconds: 15,

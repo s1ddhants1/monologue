@@ -11,6 +11,7 @@ import React, {
 } from "react";
 import { AudiobookDetail, AudiobookFile, AudiobookSummary, StreamStatus } from "@/types";
 import { downloadM3UPlaylist } from "../utils/playlist";
+import { getStreamUrl } from "../utils/stream-url";
 import {
   saveBookProgress,
   getBookProgress,
@@ -198,15 +199,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         activeFileName: track.name,
       });
 
-      const trackerParams =
-        book.trackers && book.trackers.length > 0
-          ? "&" + book.trackers.map((tr) => `tr=${encodeURIComponent(tr)}`).join("&")
-          : "";
-
-      const streamEndpoint =
-        settings.streamingMode === "bridge" && settings.bridgeUrl
-          ? `${settings.bridgeUrl}/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${trackIdx}${trackerParams}`
-          : `/api/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${trackIdx}${trackerParams}`;
+      const streamEndpoint = getStreamUrl(book.infoHash, track.name, trackIdx, book.trackers);
 
       audio.src = streamEndpoint;
       audio.load();
@@ -254,7 +247,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
           }));
         });
     },
-    [settings],
+    [],
   );
 
   const currentLoadingBookIdRef = useRef<string | null>(null);
@@ -356,10 +349,10 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       const book = targetBook || currentBook;
       if (!book) return false;
       void hapticSuccess();
-      downloadM3UPlaylist(book, settings);
+      downloadM3UPlaylist(book);
       return true;
     },
-    [currentBook, settings],
+    [currentBook],
   );
 
   const togglePlayPause = useCallback(() => {

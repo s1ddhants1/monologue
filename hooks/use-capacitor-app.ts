@@ -20,16 +20,8 @@ export function useCapacitorApp() {
         const { App } = await import("@capacitor/app");
 
         const backButtonListener = await App.addListener("backButton", ({ canGoBack }) => {
-          const {
-            isTracklistOpen,
-            isSettingsOpen,
-            isSidebarOpen,
-            isFullscreenOpen,
-            setTracklistOpen,
-            setSettingsOpen,
-            setSidebarOpen,
-            setFullscreenOpen,
-          } = useUIStore.getState();
+          const { isTracklistOpen, isFullscreenOpen, setTracklistOpen, setFullscreenOpen } =
+            useUIStore.getState();
 
           if (isFullscreenOpen) {
             hapticLight();
@@ -40,18 +32,6 @@ export function useCapacitorApp() {
           if (isTracklistOpen) {
             hapticLight();
             setTracklistOpen(false);
-            return;
-          }
-
-          if (isSettingsOpen) {
-            hapticLight();
-            setSettingsOpen(false);
-            return;
-          }
-
-          if (isSidebarOpen) {
-            hapticLight();
-            setSidebarOpen(false);
             return;
           }
 

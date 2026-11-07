@@ -4,8 +4,7 @@ import React from "react";
 import { Play, Pause, Download, Magnet } from "@/components/icons";
 import { AudiobookDetail } from "@/types";
 import { useAudioPlayback } from "../context";
-import { getBookProgress } from "../utils";
-import { useSettingsStore } from "@/features/settings";
+import { getBookProgress, getStreamUrl } from "../utils";
 import { Button } from "@/components/ui/button";
 import { hapticLight } from "@/lib/capacitor";
 
@@ -22,7 +21,6 @@ function subscribeToStorage(callback: () => void) {
 
 function PlayBookButtonComponent({ book, children, trailingActions }: PlayBookButtonProps) {
   const { currentBook, isPlaying, playBook, togglePlayPause } = useAudioPlayback();
-  const settings = useSettingsStore((s) => s.settings);
 
   const isCurrentBook = currentBook?.id === book.id;
   const hasSavedProgress = React.useSyncExternalStore(
@@ -47,14 +45,7 @@ function PlayBookButtonComponent({ book, children, trailingActions }: PlayBookBu
   const handleDownload = () => {
     const track = book.files?.[0];
     const fileName = track?.name || `${book.title}.mp3`;
-    const trackerParams =
-      book.trackers && book.trackers.length > 0
-        ? "&" + book.trackers.map((tr) => `tr=${encodeURIComponent(tr)}`).join("&")
-        : "";
-    const streamEndpoint =
-      settings.streamingMode === "bridge" && settings.bridgeUrl
-        ? `${settings.bridgeUrl}/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(fileName)}&track=0${trackerParams}`
-        : `/api/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(fileName)}&track=0${trackerParams}`;
+    const streamEndpoint = getStreamUrl(book.infoHash, fileName, 0, book.trackers);
 
     const link = document.createElement("a");
     link.href = streamEndpoint;

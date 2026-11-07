@@ -1,6 +1,7 @@
-import { AudiobookDetail, PlayerSettings } from "@/types";
+import { AudiobookDetail } from "@/types";
+import { getStreamUrl } from "./stream-url";
 
-export function generateM3UPlaylist(book: AudiobookDetail, settings: PlayerSettings): string {
+export function generateM3UPlaylist(book: AudiobookDetail): string {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const audioFiles =
     book.files && book.files.length > 0
@@ -16,16 +17,7 @@ export function generateM3UPlaylist(book: AudiobookDetail, settings: PlayerSetti
 
   let m3u = "#EXTM3U\n";
   audioFiles.forEach((track, idx) => {
-    const trackerParams =
-      book.trackers && book.trackers.length > 0
-        ? "&" + book.trackers.map((tr) => `tr=${encodeURIComponent(tr)}`).join("&")
-        : "";
-
-    const streamUrl =
-      settings.streamingMode === "bridge" && settings.bridgeUrl
-        ? `${settings.bridgeUrl}/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${idx}${trackerParams}`
-        : `${origin}/api/stream?infoHash=${book.infoHash}&file=${encodeURIComponent(track.name)}&track=${idx}${trackerParams}`;
-
+    const streamUrl = `${origin}${getStreamUrl(book.infoHash, track.name, idx, book.trackers)}`;
     const trackTitle = track.name.replace(/\.(mp3|m4b|m4a|flac|ogg)$/i, "");
     m3u += `#EXTINF:-1,${book.author ? `${book.author} - ` : ""}${trackTitle}\n`;
     m3u += `${streamUrl}\n`;
@@ -34,8 +26,8 @@ export function generateM3UPlaylist(book: AudiobookDetail, settings: PlayerSetti
   return m3u;
 }
 
-export function downloadM3UPlaylist(book: AudiobookDetail, settings: PlayerSettings): void {
-  const m3uContent = generateM3UPlaylist(book, settings);
+export function downloadM3UPlaylist(book: AudiobookDetail): void {
+  const m3uContent = generateM3UPlaylist(book);
   const blob = new Blob([m3uContent], { type: "audio/x-mpegurl" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

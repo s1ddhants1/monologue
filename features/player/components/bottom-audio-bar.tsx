@@ -4,43 +4,25 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Play,
-  Pause,
-  RotateCcw,
-  RotateCw,
-  SkipBack,
-  SkipForward,
   Volume2,
   VolumeX,
   List,
-  Clock,
-  Loader2,
   Download,
-  Check,
-  FileText,
   Maximize2,
   AudioLines,
+  FileText,
 } from "@/components/icons";
 import { useAudioPlayer } from "../context";
-import { formatTime } from "@/lib/utils/format";
 import { useUIStore } from "@/stores/ui-store";
-import { useSettingsStore } from "@/features/settings";
 import { TranscriptButton } from "@/features/transcription";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
-import { toast } from "sonner";
 import { hapticLight, hapticSuccess } from "@/lib/capacitor";
-
-const SPEED_OPTIONS = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0] as const;
+import { getStreamUrl } from "../utils/stream-url";
+import { PlayerControls } from "./player-controls";
+import { TrackScrubber } from "./track-scrubber";
+import { SpeedMenu } from "./speed-menu";
+import { SleepTimerMenu } from "./sleep-timer-menu";
 
 export function BottomAudioBar() {
   const {
@@ -72,50 +54,22 @@ export function BottomAudioBar() {
   const isFullscreenOpen = useUIStore((s) => s.isFullscreenOpen);
   const setTracklistOpen = useUIStore((s) => s.setTracklistOpen);
   const setFullscreenOpen = useUIStore((s) => s.setFullscreenOpen);
-  const settings = useSettingsStore((s) => s.settings);
-  const [isSleepMenuOpen, setIsSleepMenuOpen] = React.useState(false);
 
   const handleToggleFullscreen = React.useCallback(() => {
     void hapticLight();
     const nextState = !isFullscreenOpen;
     setFullscreenOpen(nextState);
+
     if (nextState) {
-      if (
-        typeof document !== "undefined" &&
-        !document.fullscreenElement &&
-        document.documentElement.requestFullscreen
-      ) {
+      if (document.documentElement.requestFullscreen) {
         document.documentElement.requestFullscreen().catch(() => {});
       }
     } else {
-      if (
-        typeof document !== "undefined" &&
-        document.fullscreenElement &&
-        document.exitFullscreen
-      ) {
+      if (document.fullscreenElement && document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
       }
     }
   }, [isFullscreenOpen, setFullscreenOpen]);
-
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "f" || e.key === "F") {
-        const activeEl = document.activeElement;
-        const isInput =
-          activeEl instanceof HTMLInputElement ||
-          activeEl instanceof HTMLTextAreaElement ||
-          activeEl?.getAttribute("contenteditable") === "true";
-        if (!isInput && currentBook) {
-          e.preventDefault();
-          handleToggleFullscreen();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentBook, handleToggleFullscreen]);
 
   if (!currentBook) return null;
 
@@ -128,14 +82,12 @@ export function BottomAudioBar() {
     void hapticSuccess();
     const track = currentTrack || currentBook.files?.[0];
     const fileName = track?.name || `${currentBook.title}.mp3`;
-    const trackerParams =
-      currentBook.trackers && currentBook.trackers.length > 0
-        ? "&" + currentBook.trackers.map((tr) => `tr=${encodeURIComponent(tr)}`).join("&")
-        : "";
-    const streamEndpoint =
-      settings.streamingMode === "bridge" && settings.bridgeUrl
-        ? `${settings.bridgeUrl}/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(fileName)}&track=${currentTrackIndex}${trackerParams}`
-        : `/api/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(fileName)}&track=${currentTrackIndex}${trackerParams}`;
+    const streamEndpoint = getStreamUrl(
+      currentBook.infoHash,
+      fileName,
+      currentTrackIndex,
+      currentBook.trackers,
+    );
 
     const link = document.createElement("a");
     link.href = streamEndpoint;
@@ -147,6 +99,15 @@ export function BottomAudioBar() {
 
   const progressPercent =
     duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
+
+  const currentAudioUrl = currentBook.infoHash
+    ? getStreamUrl(
+        currentBook.infoHash,
+        (currentTrack || currentBook.files?.[0])?.name || `${currentBook.title}.mp3`,
+        currentTrackIndex,
+        currentBook.trackers,
+      )
+    : "";
 
   return (
     <footer
@@ -208,153 +169,42 @@ export function BottomAudioBar() {
         </div>
 
         <div className="flex shrink-0 items-center justify-center sm:mx-auto sm:max-w-md sm:flex-1 sm:flex-col">
-          <div className="flex items-center gap-1 sm:gap-2">
-            <Button
-              type="button"
-              id="seek-back-btn"
-              variant="ghost"
-              size="icon"
-              onClick={() => skipBackward(15)}
-              title="Jump back 15s"
-              className="hidden sm:inline-flex"
-            >
-              <RotateCcw size={15} />
-            </Button>
-
-            <Button
-              type="button"
-              id="prev-btn"
-              variant="ghost"
-              size="icon"
-              onClick={prevTrack}
-              disabled={!isMultiPart || currentTrackIndex === 0}
-              title="Previous Chapter"
-              className="hidden sm:inline-flex"
-            >
-              <SkipBack size={15} />
-            </Button>
-
-            <Button
-              type="button"
-              id="play-pause-btn"
-              variant="default"
-              size="icon"
-              onClick={togglePlayPause}
-              disabled={isLoading}
-              title={isPlaying ? "Pause" : "Play"}
-              className="rounded-full"
-            >
-              <span className="inline-flex size-5 shrink-0 items-center justify-center">
-                {isLoading ? (
-                  <Loader2 size={18} className="animate-spin" />
-                ) : isPlaying ? (
-                  <Pause size={18} fill="currentColor" />
-                ) : (
-                  <Play size={18} fill="currentColor" className="ml-0.5" />
-                )}
-              </span>
-            </Button>
-
-            <Button
-              type="button"
-              id="next-btn"
-              variant="ghost"
-              size="icon"
-              onClick={nextTrack}
-              disabled={!isMultiPart || currentTrackIndex >= totalFiles - 1}
-              title="Next Chapter"
-              className="hidden sm:inline-flex"
-            >
-              <SkipForward size={15} />
-            </Button>
-
-            <Button
-              type="button"
-              id="seek-fwd-btn"
-              variant="ghost"
-              size="icon"
-              onClick={() => skipForward(30)}
-              title="Jump forward 30s"
-              className="hidden sm:inline-flex"
-            >
-              <RotateCw size={15} />
-            </Button>
-          </div>
-
-          <div className="hidden w-full items-center gap-2 font-mono text-[11px] text-muted-foreground select-none md:flex">
-            <span id="current-time" className="w-10 text-right tabular-nums">
-              {formatTime(currentTime)}
-            </span>
-            <Slider
-              id="progress-bar"
-              value={[currentTime]}
-              max={duration > 0 ? duration : 100}
-              min={0}
-              step={1}
-              onValueChange={(val) => {
-                const v = Array.isArray(val) ? val[0] : val;
-                if (typeof v === "number") seekTo(v);
-              }}
-              className="group/player relative flex h-3 flex-1 cursor-pointer touch-none items-center select-none"
-              aria-label="Progress scrubber"
+          <PlayerControls
+            isPlaying={isPlaying}
+            isLoading={isLoading}
+            isMultiPart={isMultiPart}
+            canPrevTrack={currentTrackIndex > 0}
+            canNextTrack={currentTrackIndex < totalFiles - 1}
+            onTogglePlayPause={togglePlayPause}
+            onSkipBackward={() => skipBackward(15)}
+            onSkipForward={() => skipForward(30)}
+            onPrevTrack={prevTrack}
+            onNextTrack={nextTrack}
+            size="compact"
+          />
+          <div className="hidden w-full md:block">
+            <TrackScrubber
+              currentTime={currentTime}
+              duration={duration}
+              onSeek={seekTo}
+              layout="inline"
             />
-            <span id="total-duration" className="w-10 text-left tabular-nums">
-              {duration > 0 ? formatTime(duration) : "--:--"}
-            </span>
           </div>
         </div>
 
         <div className="hidden shrink-0 items-center justify-end gap-1 sm:flex sm:w-60 sm:flex-col sm:items-end sm:justify-center md:w-64">
           <div className="flex items-center justify-end gap-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    type="button"
-                    id="speed-btn"
-                    variant="ghost"
-                    size="icon-sm"
-                    title={`Speed: ${playbackRate}x`}
-                    className="font-mono text-xs"
-                  />
-                }
-              >
-                {playbackRate}x
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-32">
-                <DropdownMenuGroup>
-                  {SPEED_OPTIONS.map((speed) => (
-                    <DropdownMenuItem
-                      key={speed}
-                      onClick={() => {
-                        void hapticLight();
-                        setPlaybackRate(speed);
-                      }}
-                    >
-                      <span className={speed === 1.0 ? "" : "font-mono"}>
-                        {speed === 1.0 ? "Normal" : `${speed}x`}
-                      </span>
-                      {playbackRate === speed && <Check className="size-3.5 text-primary" />}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SpeedMenu
+              playbackRate={playbackRate}
+              onSelectRate={setPlaybackRate}
+              align="end"
+              size="icon-sm"
+            />
 
             {currentBook.infoHash && (
               <TranscriptButton
                 trackKey={`${currentBook.infoHash}-${currentTrackIndex}`}
-                audioUrl={
-                  settings.streamingMode === "bridge" && settings.bridgeUrl
-                    ? `${settings.bridgeUrl}/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(
-                        (currentTrack || currentBook.files?.[0])?.name ||
-                          `${currentBook.title}.mp3`,
-                      )}&track=${currentTrackIndex}`
-                    : `/api/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(
-                        (currentTrack || currentBook.files?.[0])?.name ||
-                          `${currentBook.title}.mp3`,
-                      )}&track=${currentTrackIndex}`
-                }
+                audioUrl={currentAudioUrl}
                 bookTitle={currentBook.title}
                 trackName={
                   (currentTrack || currentBook.files?.[0])?.name || `Track ${currentTrackIndex + 1}`
@@ -380,109 +230,15 @@ export function BottomAudioBar() {
               <Download size={16} />
             </Button>
 
-            <DropdownMenu open={isSleepMenuOpen} onOpenChange={setIsSleepMenuOpen}>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    type="button"
-                    id="sleep-timer-btn"
-                    variant={sleepTimerRemaining || sleepOnChapterEnd ? "secondary" : "ghost"}
-                    size="icon-sm"
-                    onClick={() => {
-                      void hapticLight();
-                      setIsSleepMenuOpen((prev) => !prev);
-                    }}
-                    title={
-                      sleepOnChapterEnd
-                        ? "Sleep: End of Chapter"
-                        : sleepTimerRemaining
-                          ? `Sleep in ${Math.ceil(sleepTimerRemaining / 60)}m`
-                          : "Sleep Timer"
-                    }
-                  />
-                }
-              >
-                <Clock size={16} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuLabel className="text-xs">Sleep Timer</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  {settings.defaultSleepTimer > 0 && (
-                    <DropdownMenuItem
-                      onClick={() => {
-                        void hapticLight();
-                        setIsSleepMenuOpen(false);
-                        startSleepTimer(settings.defaultSleepTimer);
-                        toast.info("Sleep Timer", {
-                          description: `Audio will pause in ${settings.defaultSleepTimer} minutes.`,
-                        });
-                      }}
-                    >
-                      <span>Default ({settings.defaultSleepTimer} minutes)</span>
-                      {!sleepOnChapterEnd &&
-                        sleepTimerRemaining !== null &&
-                        Math.ceil(sleepTimerRemaining / 60) === settings.defaultSleepTimer && (
-                          <Check className="size-3.5 text-primary" />
-                        )}
-                    </DropdownMenuItem>
-                  )}
-                  {[15, 30, 45, 60].map((mins) => (
-                    <DropdownMenuItem
-                      key={mins}
-                      onClick={() => {
-                        void hapticLight();
-                        setIsSleepMenuOpen(false);
-                        startSleepTimer(mins);
-                        toast.info("Sleep Timer", {
-                          description: `Audio will pause in ${mins} minutes.`,
-                        });
-                      }}
-                    >
-                      <span>{mins} minutes</span>
-                      {!sleepOnChapterEnd &&
-                        sleepTimerRemaining !== null &&
-                        Math.ceil(sleepTimerRemaining / 60) === mins && (
-                          <Check className="size-3.5 text-primary" />
-                        )}
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuItem
-                    onClick={() => {
-                      void hapticLight();
-                      setIsSleepMenuOpen(false);
-                      startSleepTimer("chapter");
-                      toast.info("Sleep Timer", {
-                        description: "Audio will pause at the end of the current chapter.",
-                      });
-                    }}
-                  >
-                    <span>End of Chapter</span>
-                    {sleepOnChapterEnd && <Check className="size-3.5 text-primary" />}
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                {(sleepTimerRemaining !== null || sleepOnChapterEnd) && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          void hapticLight();
-                          setIsSleepMenuOpen(false);
-                          cancelSleepTimer();
-                          toast.info("Sleep Timer", {
-                            description: "Sleep timer turned off.",
-                          });
-                        }}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <span>Turn off</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SleepTimerMenu
+              sleepTimerRemaining={sleepTimerRemaining}
+              sleepOnChapterEnd={sleepOnChapterEnd}
+              isMultiPart={isMultiPart}
+              onStartTimer={startSleepTimer}
+              onCancelTimer={cancelSleepTimer}
+              size="icon-sm"
+              align="end"
+            />
 
             <Button
               type="button"

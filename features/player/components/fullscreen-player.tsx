@@ -3,41 +3,15 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Minimize2,
-  Play,
-  Pause,
-  RotateCcw,
-  RotateCw,
-  SkipBack,
-  SkipForward,
-  Volume2,
-  VolumeX,
-  List,
-  Clock,
-  Loader2,
-  FileText,
-  Check,
-  Sparkles,
-} from "@/components/icons";
+import { Minimize2, Volume2, VolumeX, List, Loader2, FileText, Sparkles } from "@/components/icons";
 import { useAudioPlayer } from "../context";
-import { formatTime } from "@/lib/utils/format";
 import { useUIStore } from "@/stores/ui-store";
 import { useSettingsStore } from "@/features/settings";
 import { useTranscriptionStore, transcribeAudio } from "@/features/transcription";
-import { composeSegments, type TranscriptWord } from "@/hooks/use-transcript-viewer";
+import { composeSegments } from "@/hooks/use-transcript-viewer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import {
   Empty,
   EmptyHeader,
@@ -47,11 +21,13 @@ import {
   EmptyContent,
 } from "@/components/ui/empty";
 import { Slider } from "@/components/ui/slider";
-import { toast } from "sonner";
 import { hapticLight, hapticSuccess } from "@/lib/capacitor";
 import { cn } from "@/lib/utils";
-
-const SPEED_OPTIONS = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0] as const;
+import { getStreamUrl } from "../utils/stream-url";
+import { PlayerControls } from "./player-controls";
+import { TrackScrubber } from "./track-scrubber";
+import { SpeedMenu } from "./speed-menu";
+import { SleepTimerMenu } from "./sleep-timer-menu";
 
 export function FullscreenPlayer() {
   const {
@@ -82,151 +58,72 @@ export function FullscreenPlayer() {
 
   const isFullscreenOpen = useUIStore((s) => s.isFullscreenOpen);
   const setFullscreenOpen = useUIStore((s) => s.setFullscreenOpen);
-  const isTracklistOpen = useUIStore((s) => s.isTracklistOpen);
   const setTracklistOpen = useUIStore((s) => s.setTracklistOpen);
   const settings = useSettingsStore((s) => s.settings);
 
-  const transcripts = useTranscriptionStore((s) => s.transcripts);
-  const openTranscript = useTranscriptionStore((s) => s.openTranscript);
-  const setCachedTranscript = useTranscriptionStore((s) => s.setTranscript);
-
-  const [sidePanel, setSidePanel] = useState<"transcript" | "none">("none");
-  const [isSleepMenuOpen, setIsSleepMenuOpen] = useState(false);
-  const [showControls, setShowControls] = useState<boolean>(true);
-  const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
+  const { transcripts, setTranscript, openTranscript } = useTranscriptionStore();
+  const [sidePanel, setSidePanel] = useState<"none" | "transcript">("none");
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcribeError, setTranscribeError] = useState<string | null>(null);
 
-  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const activeWordRef = useRef<HTMLSpanElement | null>(null);
-  const transcriptScrollRef = useRef<HTMLDivElement | null>(null);
+  const transcriptScrollRef = useRef<HTMLDivElement>(null);
+  const activeWordRef = useRef<HTMLSpanElement>(null);
+
+  const activeTrackKey = currentBook?.infoHash
+    ? `${currentBook.infoHash}-${currentTrackIndex}`
+    : "";
+  const currentTranscript = activeTrackKey ? transcripts[activeTrackKey] : null;
 
   const handleClose = useCallback(() => {
     void hapticLight();
     setFullscreenOpen(false);
-    if (typeof document !== "undefined" && document.fullscreenElement && document.exitFullscreen) {
+    if (document.fullscreenElement && document.exitFullscreen) {
       document.exitFullscreen().catch(() => {});
     }
   }, [setFullscreenOpen]);
 
-  const resetIdleTimer = useCallback(() => {
-    setShowControls(true);
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current);
-    }
-    if (isPlaying) {
-      controlsTimeoutRef.current = setTimeout(() => {
-        setShowControls(false);
-      }, 4000);
-    }
-  }, [isPlaying]);
-
   useEffect(() => {
-    if (!isFullscreenOpen) return;
-
-    const handleFullscreenChange = () => {
-      if (!document.fullscreenElement && isFullscreenOpen) {
-        setFullscreenOpen(false);
-      }
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, [isFullscreenOpen, setFullscreenOpen]);
-
-  useEffect(() => {
-    if (!isFullscreenOpen) return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      const activeEl = document.activeElement;
-      const isInput =
-        activeEl instanceof HTMLInputElement ||
-        activeEl instanceof HTMLTextAreaElement ||
-        activeEl?.getAttribute("contenteditable") === "true";
+      if (!isFullscreenOpen) return;
 
-      if (isInput) return;
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+        return;
+      }
 
-      if (e.key === "Escape") {
-        e.preventDefault();
-        handleClose();
-      } else if (e.key === "f" || e.key === "F") {
-        e.preventDefault();
-        handleClose();
-      } else if (e.key === " ") {
-        e.preventDefault();
-        togglePlayPause();
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        skipBackward(15);
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        skipForward(30);
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setVolume(Math.min(1, volume + 0.05));
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setVolume(Math.max(0, volume - 0.05));
-      } else if (e.key === "m" || e.key === "M") {
-        e.preventDefault();
-        toggleMute();
-      } else if (currentBook?.infoHash && (e.key === "l" || e.key === "L")) {
-        e.preventDefault();
-        setSidePanel((prev) => (prev === "transcript" ? "none" : "transcript"));
-      } else if (e.key === "q" || e.key === "Q") {
-        e.preventDefault();
-        void hapticLight();
-        setTracklistOpen(!isTracklistOpen);
+      switch (e.code) {
+        case "Escape":
+          e.preventDefault();
+          handleClose();
+          break;
+        case "Space":
+          e.preventDefault();
+          togglePlayPause();
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          skipBackward(15);
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          skipForward(30);
+          break;
+        case "KeyM":
+          e.preventDefault();
+          toggleMute();
+          break;
+        case "KeyF":
+          e.preventDefault();
+          handleClose();
+          break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [
-    isFullscreenOpen,
-    handleClose,
-    togglePlayPause,
-    skipBackward,
-    skipForward,
-    setVolume,
-    volume,
-    toggleMute,
-    currentBook?.infoHash,
-    isTracklistOpen,
-    setTracklistOpen,
-  ]);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreenOpen, handleClose, togglePlayPause, skipBackward, skipForward, toggleMute]);
 
-  useEffect(() => {
-    if (!isFullscreenOpen) return;
-
-    const handleMouseMove = () => resetIdleTimer();
-    const handleTouchStart = () => resetIdleTimer();
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("touchstart", handleTouchStart);
-
-    if (isPlaying) {
-      controlsTimeoutRef.current = setTimeout(() => {
-        setShowControls(false);
-      }, 4000);
-    }
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("touchstart", handleTouchStart);
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
-      }
-    };
-  }, [isFullscreenOpen, resetIdleTimer, isPlaying]);
-
-  const activeTrackKey = currentBook ? `${currentBook.infoHash}-${currentTrackIndex}` : "";
-  const currentTranscript = transcripts[activeTrackKey];
-
-  const { segments, words } = useMemo(() => {
+  const { words } = useMemo(() => {
     if (!currentTranscript?.transcript?.alignment) {
       return { segments: [], words: [] };
     }
@@ -256,19 +153,14 @@ export function FullscreenPlayer() {
   const totalFiles = currentBook.files?.length || 1;
   const isMultiPart = totalFiles > 1;
 
-  const trackerParams =
-    currentBook.trackers && currentBook.trackers.length > 0
-      ? "&" + currentBook.trackers.map((tr) => `tr=${encodeURIComponent(tr)}`).join("&")
-      : "";
-
-  const currentAudioUrl =
-    settings.streamingMode === "bridge" && settings.bridgeUrl
-      ? `${settings.bridgeUrl}/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(
-          (currentTrack || currentBook.files?.[0])?.name || `${currentBook.title}.mp3`,
-        )}&track=${currentTrackIndex}${trackerParams}`
-      : `/api/stream?infoHash=${currentBook.infoHash}&file=${encodeURIComponent(
-          (currentTrack || currentBook.files?.[0])?.name || `${currentBook.title}.mp3`,
-        )}&track=${currentTrackIndex}${trackerParams}`;
+  const currentAudioUrl = currentBook.infoHash
+    ? getStreamUrl(
+        currentBook.infoHash,
+        (currentTrack || currentBook.files?.[0])?.name || `${currentBook.title}.mp3`,
+        currentTrackIndex,
+        currentBook.trackers,
+      )
+    : "";
 
   const handleTranscribeSide = async () => {
     if (!settings.aiApiKey) {
@@ -300,7 +192,7 @@ export function FullscreenPlayer() {
       });
 
       void hapticSuccess();
-      setCachedTranscript(
+      setTranscript(
         activeTrackKey,
         result,
         currentAudioUrl,
@@ -319,377 +211,145 @@ export function FullscreenPlayer() {
 
   return (
     <div
-      id="full-screen-player-root"
-      className="fixed inset-0 z-[45] flex flex-col overflow-hidden bg-black font-sans text-foreground select-none"
-      onMouseMove={resetIdleTimer}
+      id="fullscreen-player"
+      className="fixed inset-0 z-50 flex flex-col bg-background/98 backdrop-blur-2xl transition-all duration-300 ease-out"
     >
-      <header
-        className={cn(
-          "pointer-events-none absolute inset-x-0 top-0 z-20 flex h-16 items-center justify-end px-5 transition-opacity duration-300 ease-in-out sm:px-8",
-          showControls ? "opacity-100" : "opacity-0 hover:opacity-100",
-        )}
-      >
-        <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-border/60 bg-background/80 px-2 py-1 backdrop-blur-xl">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-border/60 px-5 sm:px-8">
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="text-xs font-semibold">
+            Now Playing
+          </Badge>
+          {isMultiPart && (
+            <span className="text-xs text-muted-foreground">
+              Part {currentTrackIndex + 1} of {totalFiles}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
           {currentBook.infoHash && (
             <Button
               type="button"
-              variant="ghost"
-              size="icon"
+              variant={sidePanel === "transcript" ? "secondary" : "ghost"}
+              size="sm"
               onClick={() => {
                 void hapticLight();
-                setSidePanel((prev) => (prev === "transcript" ? "none" : "transcript"));
+                setSidePanel((p) => (p === "transcript" ? "none" : "transcript"));
               }}
-              title="Transcription on the side (L)"
-              className={cn(
-                "h-8 w-8 cursor-pointer rounded-full transition-colors",
-                sidePanel === "transcript"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-              )}
+              className="gap-1.5 text-xs"
             >
-              <FileText size={16} />
-            </Button>
-          )}
-
-          {isMultiPart && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                void hapticLight();
-                setTracklistOpen(!isTracklistOpen);
-              }}
-              title="Chapter Queue on the side (Q)"
-              className={cn(
-                "h-8 w-8 cursor-pointer rounded-full transition-colors",
-                isTracklistOpen
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-              )}
-            >
-              <List size={16} />
+              <FileText size={15} />
+              <span className="hidden sm:inline">Transcript</span>
             </Button>
           )}
 
           <Button
             type="button"
-            id="close-fullscreen-btn"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              void hapticLight();
+              setTracklistOpen(true);
+            }}
+            className="gap-1.5 text-xs"
+          >
+            <List size={15} />
+            <span className="hidden sm:inline">Tracklist</span>
+          </Button>
+
+          <Button
+            type="button"
             variant="ghost"
             size="icon"
             onClick={handleClose}
-            title="Exit Fullscreen (Esc or F)"
+            title="Minimize (Esc)"
+            className="size-9 rounded-full"
           >
-            <Minimize2 size={16} />
+            <Minimize2 size={18} />
           </Button>
         </div>
-      </header>
+      </div>
 
-      <main className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 py-8 sm:px-8 sm:py-12 lg:px-12">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-6 sm:p-10 lg:flex-row lg:gap-12">
         <div
           className={cn(
-            "mx-auto flex h-full min-h-0 w-full max-w-7xl items-center justify-center gap-8 lg:gap-14",
-            isSidePanelActive ? "flex-col lg:flex-row" : "flex-col",
+            "flex w-full flex-col items-center justify-center transition-all duration-300",
+            isSidePanelActive ? "lg:max-w-md xl:max-w-lg" : "max-w-xl",
           )}
         >
-          <div
-            className={cn(
-              "flex min-w-0 flex-col items-center justify-center gap-4 text-center transition-all duration-300 sm:gap-5",
-              isSidePanelActive
-                ? "w-full shrink-0 lg:w-[420px] xl:w-[460px]"
-                : "mx-auto w-full max-w-[460px]",
-            )}
-          >
-            <div className="group relative shrink-0">
-              <Image
-                src={currentBook.cover || "/placeholder-cover.svg"}
-                alt={currentBook.title}
-                width={400}
-                height={400}
-                priority
-                className={cn(
-                  "rounded-3xl border border-border/60 object-cover",
-                  isSidePanelActive
-                    ? "size-44 sm:size-52 lg:size-56 xl:size-60"
-                    : "size-56 sm:size-64 md:size-72 lg:size-80",
-                )}
-              />
-            </div>
+          <div className="relative mb-8 aspect-square w-48 shrink-0 overflow-hidden rounded-3xl border border-border/80 bg-muted/40 shadow-2xl sm:w-64 md:w-72 lg:w-80">
+            <Image
+              src={currentBook.cover || "/placeholder-cover.svg"}
+              alt={currentBook.title}
+              fill
+              sizes="(max-width: 640px) 192px, (max-width: 768px) 256px, 320px"
+              className="object-cover"
+              priority
+            />
+          </div>
 
-            <div className="flex w-full max-w-md flex-col gap-1">
-              <h1 className="line-clamp-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl lg:text-3xl">
-                <Link
-                  href={`/book/${currentBook.id}`}
-                  onClick={() => {
-                    handleClose();
-                  }}
-                  className="transition-colors hover:text-primary hover:underline"
-                >
-                  {currentBook.title}
-                </Link>
-              </h1>
-              <p className="truncate text-sm font-medium text-muted-foreground sm:text-base">
-                {currentBook.author || "Audiobook"}
+          <div className="mb-8 w-full max-w-md text-center">
+            <Link
+              href={`/book/${currentBook.id}`}
+              onClick={handleClose}
+              className="block truncate text-lg font-bold tracking-tight text-foreground transition-colors hover:text-primary sm:text-2xl"
+              title={currentBook.title}
+            >
+              {currentBook.title}
+            </Link>
+            <p className="mt-1 truncate text-xs text-muted-foreground sm:text-sm">
+              {currentBook.author || "Audiobook"}
+            </p>
+            {isMultiPart && currentTrack && (
+              <p className="mt-0.5 truncate text-[11px] text-muted-foreground/80">
+                {currentTrack.name}
               </p>
-              {isMultiPart && currentTrack && (
-                <p className="truncate font-mono text-xs text-primary">
-                  Part {currentTrackIndex + 1}: {currentTrack.name}
-                </p>
-              )}
-            </div>
+            )}
+          </div>
 
-            <div className="flex items-center justify-center gap-2 sm:gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => skipBackward(15)}
-                title="Jump back 15s (Left Arrow)"
-              >
-                <RotateCcw size={18} />
-              </Button>
+          <div className="flex w-full max-w-md flex-col items-center gap-6">
+            <PlayerControls
+              isPlaying={isPlaying}
+              isLoading={isLoading}
+              isMultiPart={isMultiPart}
+              canPrevTrack={currentTrackIndex > 0}
+              canNextTrack={currentTrackIndex < totalFiles - 1}
+              onTogglePlayPause={togglePlayPause}
+              onSkipBackward={() => skipBackward(15)}
+              onSkipForward={() => skipForward(30)}
+              onPrevTrack={prevTrack}
+              onNextTrack={nextTrack}
+              size="large"
+            />
 
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={prevTrack}
-                disabled={!isMultiPart || currentTrackIndex === 0}
-                title="Previous Chapter"
-              >
-                <SkipBack size={20} />
-              </Button>
-
-              <Button
-                type="button"
-                variant="default"
-                size="icon"
-                onClick={togglePlayPause}
-                disabled={isLoading}
-                title={isPlaying ? "Pause (Space)" : "Play (Space)"}
-                className="size-12 rounded-full"
-              >
-                <span className="inline-flex size-6 shrink-0 items-center justify-center">
-                  {isLoading ? (
-                    <Loader2 size={22} className="animate-spin" />
-                  ) : isPlaying ? (
-                    <Pause size={22} fill="currentColor" />
-                  ) : (
-                    <Play size={22} fill="currentColor" className="ml-0.5" />
-                  )}
-                </span>
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={nextTrack}
-                disabled={!isMultiPart || currentTrackIndex >= totalFiles - 1}
-                title="Next Chapter"
-              >
-                <SkipForward size={20} />
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => skipForward(30)}
-                title="Jump forward 30s (Right Arrow)"
-              >
-                <RotateCw size={18} />
-              </Button>
-            </div>
-
-            <div className="flex w-full max-w-md flex-col gap-1.5">
-              <Slider
-                value={[currentTime]}
-                max={duration > 0 ? duration : 100}
-                min={0}
-                step={1}
-                onValueChange={(val) => {
-                  const v = Array.isArray(val) ? val[0] : val;
-                  if (typeof v === "number") seekTo(v);
-                }}
-                className="group/fs relative flex h-4 cursor-pointer touch-none items-center select-none"
-                aria-label="Fullscreen progress scrubber"
-              />
-              <div className="flex items-center justify-between font-mono text-xs text-muted-foreground select-none">
-                <span className="w-16 min-w-[56px] shrink-0 text-left tabular-nums">
-                  {formatTime(currentTime)}
-                </span>
-                <span className="w-16 min-w-[56px] shrink-0 text-right tabular-nums">
-                  {duration > 0 ? formatTime(duration) : "--:--"}
-                </span>
-              </div>
-            </div>
+            <TrackScrubber
+              currentTime={currentTime}
+              duration={duration}
+              onSeek={seekTo}
+              layout="stacked"
+              className="max-w-md"
+            />
 
             <div className="flex w-full max-w-md items-center justify-between pt-1">
               <div className="flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        title={`Speed: ${playbackRate}x`}
-                        className="h-8 cursor-pointer rounded-lg px-2.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                      />
-                    }
-                  >
-                    {playbackRate}x
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="min-w-[120px] border-border bg-card"
-                  >
-                    <DropdownMenuGroup>
-                      {SPEED_OPTIONS.map((speed) => (
-                        <DropdownMenuItem
-                          key={speed}
-                          onClick={() => {
-                            void hapticLight();
-                            setPlaybackRate(speed);
-                          }}
-                          className="flex cursor-pointer items-center justify-between text-xs"
-                        >
-                          <span className={speed === 1.0 ? "" : "font-mono"}>
-                            {speed === 1.0 ? "Normal" : `${speed}x`}
-                          </span>
-                          {playbackRate === speed && <Check className="size-3.5 text-primary" />}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <SpeedMenu
+                  playbackRate={playbackRate}
+                  onSelectRate={setPlaybackRate}
+                  align="start"
+                  size="sm"
+                  className="h-8 rounded-lg px-2.5 font-mono text-xs text-muted-foreground"
+                />
 
-                <DropdownMenu open={isSleepMenuOpen} onOpenChange={setIsSleepMenuOpen}>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        type="button"
-                        id="sleep-timer-btn-fs"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          void hapticLight();
-                          setIsSleepMenuOpen((prev) => !prev);
-                        }}
-                        title={
-                          sleepOnChapterEnd
-                            ? "Sleep: End of Chapter"
-                            : sleepTimerRemaining
-                              ? `Sleep in ${Math.ceil(sleepTimerRemaining / 60)}m`
-                              : "Sleep Timer"
-                        }
-                        className={cn(
-                          "h-8 cursor-pointer rounded-lg px-2.5 text-xs transition-colors",
-                          sleepTimerRemaining || sleepOnChapterEnd
-                            ? "bg-primary/20 text-primary"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                        )}
-                      />
-                    }
-                  >
-                    <Clock
-                      size={14}
-                      className={sleepTimerRemaining || sleepOnChapterEnd ? "mr-1.5" : ""}
-                    />
-                    {sleepOnChapterEnd ? (
-                      <span>End of Ch.</span>
-                    ) : sleepTimerRemaining ? (
-                      <span>{Math.ceil(sleepTimerRemaining / 60)}m</span>
-                    ) : null}
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="min-w-[150px] border-border bg-card"
-                  >
-                    <DropdownMenuLabel className="text-[11px] font-medium text-muted-foreground">
-                      Sleep Timer
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      {settings.defaultSleepTimer > 0 && (
-                        <DropdownMenuItem
-                          onClick={() => {
-                            void hapticLight();
-                            setIsSleepMenuOpen(false);
-                            startSleepTimer(settings.defaultSleepTimer);
-                            toast.info("Sleep Timer", {
-                              description: `Audio will pause in ${settings.defaultSleepTimer} minutes.`,
-                            });
-                          }}
-                          className="flex cursor-pointer items-center justify-between text-xs"
-                        >
-                          <span>Default ({settings.defaultSleepTimer} minutes)</span>
-                          {!sleepOnChapterEnd &&
-                            sleepTimerRemaining !== null &&
-                            Math.ceil(sleepTimerRemaining / 60) === settings.defaultSleepTimer && (
-                              <Check className="size-3.5 text-primary" />
-                            )}
-                        </DropdownMenuItem>
-                      )}
-                      {[15, 30, 45, 60].map((mins) => (
-                        <DropdownMenuItem
-                          key={mins}
-                          onClick={() => {
-                            void hapticLight();
-                            setIsSleepMenuOpen(false);
-                            startSleepTimer(mins);
-                            toast.info("Sleep Timer", {
-                              description: `Audio will pause in ${mins} minutes.`,
-                            });
-                          }}
-                          className="flex cursor-pointer items-center justify-between text-xs"
-                        >
-                          <span>{mins} minutes</span>
-                          {!sleepOnChapterEnd &&
-                            sleepTimerRemaining !== null &&
-                            Math.ceil(sleepTimerRemaining / 60) === mins && (
-                              <Check className="size-3.5 text-primary" />
-                            )}
-                        </DropdownMenuItem>
-                      ))}
-                      <DropdownMenuItem
-                        onClick={() => {
-                          void hapticLight();
-                          setIsSleepMenuOpen(false);
-                          startSleepTimer("chapter");
-                          toast.info("Sleep Timer", {
-                            description: "Audio will pause at the end of the current chapter.",
-                          });
-                        }}
-                        className="flex cursor-pointer items-center justify-between text-xs"
-                      >
-                        <span>End of Chapter</span>
-                        {sleepOnChapterEnd && <Check className="size-3.5 text-primary" />}
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    {(sleepTimerRemaining !== null || sleepOnChapterEnd) && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              void hapticLight();
-                              setIsSleepMenuOpen(false);
-                              cancelSleepTimer();
-                              toast.info("Sleep Timer", {
-                                description: "Sleep timer turned off.",
-                              });
-                            }}
-                            className="flex cursor-pointer items-center justify-between text-xs text-rose-400 focus:text-rose-400"
-                          >
-                            <span>Turn off</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <SleepTimerMenu
+                  sleepTimerRemaining={sleepTimerRemaining}
+                  sleepOnChapterEnd={sleepOnChapterEnd}
+                  isMultiPart={isMultiPart}
+                  onStartTimer={startSleepTimer}
+                  onCancelTimer={cancelSleepTimer}
+                  size="sm"
+                  align="start"
+                  className="h-8 rounded-lg px-2.5 text-xs text-muted-foreground"
+                />
               </div>
 
               <div className="flex items-center gap-2">
@@ -699,7 +359,7 @@ export function FullscreenPlayer() {
                   size="icon"
                   onClick={toggleMute}
                   title={isMuted ? "Unmute" : "Mute"}
-                  className="size-8 cursor-pointer rounded-full text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  className="size-8 rounded-full text-muted-foreground"
                 >
                   {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
                 </Button>
@@ -717,158 +377,144 @@ export function FullscreenPlayer() {
               </div>
             </div>
           </div>
+        </div>
 
-          {currentBook.infoHash && sidePanel === "transcript" && (
-            <Card
-              id="fad-lyrics-plus-container"
-              className="flex h-full max-h-[50vh] min-h-0 w-full flex-1 flex-col overflow-hidden rounded-3xl border border-border/80 bg-card/60 p-5 backdrop-blur-xl sm:p-7 lg:max-h-full lg:w-auto"
-            >
-              <div className="flex shrink-0 items-center justify-between border-b border-border/60 pb-3.5">
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-foreground uppercase">
-                    <Sparkles size={15} className="text-primary" />
-                    Transcription
-                  </span>
-                  {currentTranscript && (
-                    <Badge
-                      variant="outline"
-                      className="border-primary/20 bg-primary/10 py-0 text-[10px] text-primary"
-                    >
-                      Live Sync
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      void hapticLight();
-                      openTranscript({
-                        trackKey: activeTrackKey,
-                        audioUrl: currentAudioUrl,
-                        bookTitle: currentBook.title,
-                        trackName: (currentTrack || currentBook.files?.[0])?.name,
-                        infoHash: currentBook.infoHash,
-                        trackIndex: currentTrackIndex,
-                      });
-                    }}
-                    className="h-7 cursor-pointer rounded-lg px-2.5 text-xs text-primary hover:bg-primary/10 hover:text-primary"
+        {currentBook.infoHash && sidePanel === "transcript" && (
+          <Card className="flex h-full max-h-[50vh] min-h-0 w-full flex-1 flex-col overflow-hidden rounded-3xl border border-border/80 bg-card/60 p-5 backdrop-blur-xl sm:p-7 lg:max-h-full lg:w-auto">
+            <div className="flex shrink-0 items-center justify-between border-b border-border/60 pb-3.5">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-foreground uppercase">
+                  <Sparkles size={15} className="text-primary" />
+                  Transcription
+                </span>
+                {currentTranscript && (
+                  <Badge
+                    variant="outline"
+                    className="border-primary/20 bg-primary/10 py-0 text-[10px] text-primary"
                   >
-                    Full Dialog
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      void hapticLight();
-                      setSidePanel("none");
-                    }}
-                    title="Hide Transcriptions (L)"
-                    className="h-7 w-7 cursor-pointer rounded-full text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  >
-                    <Minimize2 size={13} />
-                  </Button>
-                </div>
-              </div>
-
-              <div
-                ref={transcriptScrollRef}
-                className="mt-4 min-h-0 flex-1 overflow-y-auto pr-3 select-text"
-              >
-                {currentTranscript && segments.length > 0 ? (
-                  <div className="py-4 text-lg leading-relaxed font-bold tracking-normal sm:text-xl lg:text-2xl">
-                    {segments.map((segment) => {
-                      if (segment.kind === "gap") {
-                        return (
-                          <span
-                            key={`gap-${segment.segmentIndex}`}
-                            className="whitespace-pre text-muted-foreground/30"
-                          >
-                            {segment.text}
-                          </span>
-                        );
-                      }
-
-                      const word = segment as TranscriptWord;
-                      const isSpoken = currentTime >= word.endTime;
-                      const isCurrent = currentTime >= word.startTime && currentTime < word.endTime;
-
-                      return (
-                        <span
-                          key={`word-${word.segmentIndex}`}
-                          ref={isCurrent ? activeWordRef : undefined}
-                          onClick={() => {
-                            void hapticLight();
-                            seekTo(word.startTime);
-                          }}
-                          className={cn(
-                            "inline-block cursor-pointer rounded-md px-1 py-0.5 transition-colors duration-150 select-text",
-                            isCurrent && "bg-primary/20 font-bold text-primary",
-                            isSpoken &&
-                              !isCurrent &&
-                              "text-foreground/90 hover:bg-accent hover:text-accent-foreground",
-                            !isSpoken &&
-                              !isCurrent &&
-                              "text-muted-foreground/50 hover:text-foreground",
-                          )}
-                        >
-                          {word.text}
-                        </span>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <Empty className="my-auto max-w-sm">
-                    <EmptyHeader>
-                      <EmptyMedia
-                        variant="icon"
-                        className="size-14 rounded-2xl border border-primary/20 bg-primary/10 text-primary"
-                      >
-                        {isTranscribing ? (
-                          <Loader2 size={26} className="animate-spin" />
-                        ) : (
-                          <Sparkles size={26} />
-                        )}
-                      </EmptyMedia>
-                      <EmptyTitle>
-                        {isTranscribing
-                          ? "Transcribing Audio..."
-                          : "No Transcription on the Side Yet"}
-                      </EmptyTitle>
-                      <EmptyDescription>
-                        {isTranscribing
-                          ? `Processing speech segments with ${settings.aiProvider.toUpperCase()} (${settings.aiModel}).`
-                          : "Generate real-time word-synchronized transcriptions for this chapter powered by AI SDK."}
-                      </EmptyDescription>
-                    </EmptyHeader>
-                    {transcribeError && (
-                      <p className="mt-2 text-xs text-destructive">{transcribeError}</p>
-                    )}
-                    {!isTranscribing && (
-                      <EmptyContent>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={handleTranscribeSide}
-                          className="mt-2 cursor-pointer gap-2 rounded-full border-primary/40 text-xs text-primary hover:bg-primary/15"
-                        >
-                          <Sparkles size={14} />
-                          <span>Transcribe Chapter</span>
-                        </Button>
-                      </EmptyContent>
-                    )}
-                  </Empty>
+                    Live Sync
+                  </Badge>
                 )}
               </div>
-            </Card>
-          )}
-        </div>
-      </main>
+
+              <div className="flex items-center gap-1.5">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    void hapticLight();
+                    openTranscript({
+                      trackKey: activeTrackKey,
+                      audioUrl: currentAudioUrl,
+                      bookTitle: currentBook.title,
+                      trackName: (currentTrack || currentBook.files?.[0])?.name,
+                      infoHash: currentBook.infoHash,
+                      trackIndex: currentTrackIndex,
+                    });
+                  }}
+                  className="text-xs"
+                >
+                  Modal View
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    void hapticLight();
+                    setSidePanel("none");
+                  }}
+                  className="size-7 rounded-full text-muted-foreground"
+                >
+                  <Minimize2 size={14} />
+                </Button>
+              </div>
+            </div>
+
+            <div
+              ref={transcriptScrollRef}
+              className="relative min-h-0 flex-1 overflow-y-auto pt-6 pr-3 pb-12 select-text"
+            >
+              {currentTranscript ? (
+                <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-2 leading-relaxed">
+                  {words.length > 0 ? (
+                    words.map((w, idx) => {
+                      const isActive = idx === activeWordIndex;
+                      const isPast = currentTime >= w.endTime;
+                      return (
+                        <span
+                          key={w.segmentIndex}
+                          ref={isActive ? activeWordRef : undefined}
+                          onClick={() => {
+                            void hapticLight();
+                            seekTo(w.startTime);
+                          }}
+                          className={cn(
+                            "cursor-pointer rounded px-0.5 text-sm transition-all sm:text-base",
+                            isActive
+                              ? "bg-primary font-bold text-primary-foreground shadow-sm"
+                              : isPast
+                                ? "font-medium text-foreground"
+                                : "text-muted-foreground/50 hover:text-foreground",
+                          )}
+                        >
+                          {w.text}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    <p className="text-sm leading-relaxed text-foreground">
+                      {currentTranscript.transcript.text}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="flex h-full min-h-[220px] flex-col items-center justify-center">
+                  <Empty className="border-0 bg-transparent py-4">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <FileText className="size-6 text-muted-foreground" />
+                      </EmptyMedia>
+                      <EmptyTitle className="text-sm">No Transcript Available</EmptyTitle>
+                      <EmptyDescription className="text-xs">
+                        Generate synchronized captions for this chapter using your AI API key.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <EmptyContent>
+                      <Button
+                        type="button"
+                        onClick={handleTranscribeSide}
+                        disabled={isTranscribing}
+                        size="sm"
+                        className="gap-2 text-xs"
+                      >
+                        {isTranscribing ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Transcribing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles size={14} />
+                            {settings.aiApiKey ? "Transcribe Now" : "Configure AI Key"}
+                          </>
+                        )}
+                      </Button>
+                      {transcribeError && (
+                        <p className="mt-2 text-center text-xs text-destructive">
+                          {transcribeError}
+                        </p>
+                      )}
+                    </EmptyContent>
+                  </Empty>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
