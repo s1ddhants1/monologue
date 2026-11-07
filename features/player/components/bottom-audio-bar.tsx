@@ -3,26 +3,19 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Volume2,
-  VolumeX,
-  List,
-  Download,
-  Maximize2,
-  AudioLines,
-  FileText,
-} from "@/components/icons";
+import { List, Download, Maximize2, AudioLines, FileText } from "@/components/icons";
 import { useAudioPlayer } from "../context";
 import { useUIStore } from "@/stores/ui-store";
 import { TranscriptButton } from "@/features/transcription";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+import { Progress } from "@/components/ui/progress";
 import { hapticLight, hapticSuccess } from "@/lib/capacitor";
 import { getStreamUrl } from "../utils/stream-url";
 import { PlayerControls } from "./player-controls";
 import { TrackScrubber } from "./track-scrubber";
 import { SpeedMenu } from "./speed-menu";
 import { SleepTimerMenu } from "./sleep-timer-menu";
+import { VolumeControl } from "./volume-control";
 
 export function BottomAudioBar() {
   const {
@@ -267,40 +260,24 @@ export function BottomAudioBar() {
             </Button>
           </div>
 
-          <div className="hidden w-full items-center justify-end gap-1.5 sm:flex">
-            <Button
-              type="button"
-              id="volume-btn"
-              variant="ghost"
-              size="icon-sm"
-              onClick={toggleMute}
-              title={isMuted ? "Unmute" : "Mute"}
-            >
-              {isMuted || volume === 0 ? <VolumeX size={14} /> : <Volume2 size={14} />}
-            </Button>
-            <Slider
-              id="volume-bar"
-              value={[isMuted ? 0 : volume * 100]}
-              max={100}
-              step={1}
-              onValueChange={(val) => {
-                const v = Array.isArray(val) ? val[0] : val;
-                if (typeof v === "number") setVolume(v / 100);
-              }}
-              className="w-20 cursor-pointer"
-              aria-label="Volume slider"
+          <div className="hidden w-full items-center justify-end sm:flex">
+            <VolumeControl
+              volume={volume}
+              isMuted={isMuted}
+              onToggleMute={toggleMute}
+              onVolumeChange={setVolume}
+              sliderClassName="w-20 cursor-pointer"
+              buttonSize="icon-sm"
+              iconSize={14}
             />
           </div>
         </div>
       </div>
 
-      <div
+      <Progress
         id="mobile-progress-bar"
-        className="relative h-1 w-full cursor-pointer overflow-hidden bg-muted md:hidden"
-        role="progressbar"
-        aria-valuenow={Math.round(currentTime)}
-        aria-valuemin={0}
-        aria-valuemax={Math.round(duration > 0 ? duration : 100)}
+        value={progressPercent}
+        className="h-1 w-full cursor-pointer gap-0 rounded-none md:hidden"
         aria-label="Playback progress"
         onClick={(e) => {
           e.stopPropagation();
@@ -329,12 +306,7 @@ export function BottomAudioBar() {
             seekTo(pct * duration);
           }
         }}
-      >
-        <div
-          className="h-full bg-primary transition-all duration-150 ease-linear"
-          style={{ width: `${progressPercent}%` }}
-        />
-      </div>
+      />
     </footer>
   );
 }

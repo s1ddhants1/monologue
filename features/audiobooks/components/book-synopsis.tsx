@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp, ExternalLink } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 export interface BookSynopsisProps {
   description: string;
@@ -93,14 +93,22 @@ function renderParagraph(para: string, pIdx: number) {
 export function BookSynopsis({ description }: BookSynopsisProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const paragraphs = description
+  const rawParagraphs = description
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter(Boolean);
 
-  const isLong = description.length > 350 || paragraphs.length > 2;
+  let paragraphs = rawParagraphs;
+  if (rawParagraphs.length === 1 && description.length > 350) {
+    const splitIndex = description.lastIndexOf(". ", 300);
+    if (splitIndex > 50) {
+      paragraphs = [description.slice(0, splitIndex + 1), description.slice(splitIndex + 2)];
+    }
+  }
 
-  if (!isLong) {
+  const isLong = description.length > 350 || paragraphs.length > 1;
+
+  if (!isLong || paragraphs.length === 0) {
     return (
       <div className="max-w-3xl text-sm leading-relaxed text-foreground/90">
         <div className="flex flex-col gap-3">
@@ -110,26 +118,29 @@ export function BookSynopsis({ description }: BookSynopsisProps) {
     );
   }
 
+  const firstParagraph = paragraphs[0];
+  const remainingParagraphs = paragraphs.slice(1);
+
   return (
     <div className="max-w-3xl text-sm leading-relaxed text-foreground/90">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <div
-          className={`flex flex-col gap-3 transition-[max-height] duration-300 ${
-            !isExpanded ? "relative max-h-36 overflow-hidden" : "max-h-none"
-          }`}
-        >
-          {paragraphs.map((para, idx) => renderParagraph(para, idx))}
-          {!isExpanded && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-background to-transparent" />
+        <div className="flex flex-col gap-3">
+          {renderParagraph(firstParagraph, 0)}
+          {remainingParagraphs.length > 0 && (
+            <CollapsibleContent className="flex flex-col gap-3 overflow-hidden data-[ending-style]:animate-collapsible-up data-[starting-style]:animate-collapsible-down">
+              {remainingParagraphs.map((para, idx) => renderParagraph(para, idx + 1))}
+            </CollapsibleContent>
           )}
         </div>
 
-        <CollapsibleTrigger
-          render={<Button type="button" variant="link" size="sm" className="mt-2 h-auto p-0" />}
-        >
-          <span>{isExpanded ? "Show less" : "Read more..."}</span>
-          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </CollapsibleTrigger>
+        {remainingParagraphs.length > 0 && (
+          <CollapsibleTrigger
+            render={<Button type="button" variant="link" size="sm" className="mt-2 h-auto p-0" />}
+          >
+            <span>{isExpanded ? "Show less" : "Read more..."}</span>
+            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </CollapsibleTrigger>
+        )}
       </Collapsible>
     </div>
   );

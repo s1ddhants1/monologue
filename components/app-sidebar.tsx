@@ -15,6 +15,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { BookHeadphones, Home, Compass, Library, History, Settings } from "@/components/icons";
 
 const mainNavItems = [
@@ -60,9 +61,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               render={<Link href="/" className="flex items-center gap-3" />}
               className="transition-colors hover:bg-sidebar-accent/50"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <BookHeadphones className="size-4" />
-              </div>
+              <Avatar
+                size="default"
+                className="size-8 rounded-xl bg-primary text-primary-foreground"
+              >
+                <AvatarFallback className="rounded-xl bg-primary text-primary-foreground">
+                  <BookHeadphones className="size-4" />
+                </AvatarFallback>
+              </Avatar>
               <div className="grid flex-1 text-left leading-tight">
                 <span className="truncate text-sm font-bold tracking-tight text-foreground">
                   Monologue

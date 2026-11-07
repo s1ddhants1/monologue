@@ -1,4 +1,5 @@
 import React from "react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -15,9 +16,9 @@ export default function Loading() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="w-[136px] flex-none snap-start sm:w-[152px] md:w-[164px]">
               <Card className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-card p-2.5">
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/40">
+                <AspectRatio ratio={1} className="w-full overflow-hidden rounded-xl bg-muted/40">
                   <Skeleton className="size-full rounded-xl" />
-                </div>
+                </AspectRatio>
                 <CardContent className="flex flex-1 flex-col justify-between px-0.5 pt-2.5 pb-0">
                   <Skeleton className="h-3.5 w-3/4 rounded" />
                   <Skeleton className="mt-1.5 h-3 w-1/2 rounded" />
@@ -41,9 +42,9 @@ export default function Loading() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="w-[136px] flex-none snap-start sm:w-[152px] md:w-[164px]">
               <Card className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-card p-2.5">
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/40">
+                <AspectRatio ratio={1} className="w-full overflow-hidden rounded-xl bg-muted/40">
                   <Skeleton className="size-full rounded-xl" />
-                </div>
+                </AspectRatio>
                 <CardContent className="flex flex-1 flex-col justify-between px-0.5 pt-2.5 pb-0">
                   <Skeleton className="h-3.5 w-3/4 rounded" />
                   <Skeleton className="mt-1.5 h-3 w-1/2 rounded" />

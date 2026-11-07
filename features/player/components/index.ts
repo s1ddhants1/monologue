@@ -5,3 +5,4 @@ export * from "./speed-menu";
 export * from "./sleep-timer-menu";
 export * from "./track-scrubber";
 export * from "./player-controls";
+export * from "./volume-control";

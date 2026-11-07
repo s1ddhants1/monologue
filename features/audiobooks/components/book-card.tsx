@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Play, Pause } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { AudiobookSummary } from "@/types";
 import { useOptionalAudioPlayback, getBookProgress } from "@/features/player";
 import { cn } from "@/lib/utils";
@@ -54,7 +55,7 @@ export function BookCard({ book }: BookCardProps) {
 
   return (
     <Card className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-card p-2.5 transition-colors hover:border-border">
-      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted/40">
+      <AspectRatio ratio={1} className="w-full overflow-hidden rounded-xl bg-muted/40">
         <Link
           href={`/book/${book.id}`}
           className="block h-full w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -96,7 +97,7 @@ export function BookCard({ book }: BookCardProps) {
             <Play size={15} fill="currentColor" className="ml-0.5" />
           )}
         </Button>
-      </div>
+      </AspectRatio>
 
       <CardContent className="flex flex-1 flex-col justify-between px-0.5 pt-2.5 pb-0">
         <div>

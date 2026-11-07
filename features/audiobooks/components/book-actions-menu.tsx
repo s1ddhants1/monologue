@@ -5,6 +5,7 @@ import { MoreVertical, Activity, ExternalLink, HardDrive, Users } from "@/compon
 import { AudiobookDetail } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Stat } from "@/components/ui/stat";
 import {
   Dialog,
   DialogContent,
@@ -105,32 +106,40 @@ export function BookActionsMenu({ book, className = "" }: BookActionsMenuProps) 
                 <span>Swarm Activity</span>
               </div>
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-                <Card className="gap-0 border-border/60 bg-muted/30 p-3">
-                  <div className="text-[11px] text-muted-foreground">Seeders</div>
-                  <div className="mt-0.5 flex items-center gap-1.5 text-lg font-bold text-emerald-400">
-                    <span className="inline-block size-2 rounded-full bg-emerald-500" />
-                    {book.seeders ?? 0}
-                  </div>
-                </Card>
-                <Card className="gap-0 border-border/60 bg-muted/30 p-3">
-                  <div className="text-[11px] text-muted-foreground">Leechers</div>
-                  <div className="mt-0.5 flex items-center gap-1.5 text-lg font-bold text-sky-400">
-                    <span className="inline-block size-2 rounded-full bg-sky-500" />
-                    {book.leechers ?? 0}
-                  </div>
-                </Card>
-                <Card className="gap-0 border-border/60 bg-muted/30 p-3">
-                  <div className="text-[11px] text-muted-foreground">Audio Size</div>
-                  <div className="mt-0.5 truncate font-mono text-base font-bold text-foreground sm:text-lg">
-                    {book.fileSize || "Unknown"}
-                  </div>
-                </Card>
-                <Card className="gap-0 border-border/60 bg-muted/30 p-3">
-                  <div className="text-[11px] text-muted-foreground">Total Peers</div>
-                  <div className="mt-0.5 text-lg font-bold text-foreground">
-                    {(book.seeders ?? 0) + (book.leechers ?? 0)}
-                  </div>
-                </Card>
+                <Stat
+                  title="Seeders"
+                  value={
+                    <span className="flex items-center justify-center gap-1.5 text-emerald-400">
+                      <span className="inline-block size-2 rounded-full bg-emerald-500" />
+                      {book.seeders ?? 0}
+                    </span>
+                  }
+                  className="rounded-xl border-border/60 bg-muted/30 p-3"
+                />
+                <Stat
+                  title="Leechers"
+                  value={
+                    <span className="flex items-center justify-center gap-1.5 text-sky-400">
+                      <span className="inline-block size-2 rounded-full bg-sky-500" />
+                      {book.leechers ?? 0}
+                    </span>
+                  }
+                  className="rounded-xl border-border/60 bg-muted/30 p-3"
+                />
+                <Stat
+                  title="Audio Size"
+                  value={
+                    <span className="truncate font-mono text-base font-bold sm:text-lg">
+                      {book.fileSize || "Unknown"}
+                    </span>
+                  }
+                  className="rounded-xl border-border/60 bg-muted/30 p-3"
+                />
+                <Stat
+                  title="Total Peers"
+                  value={(book.seeders ?? 0) + (book.leechers ?? 0)}
+                  className="rounded-xl border-border/60 bg-muted/30 p-3"
+                />
               </div>
             </Card>
 

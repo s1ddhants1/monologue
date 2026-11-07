@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Clock, BookOpen, ListMusic, Sparkles } from "@/components/icons";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -74,15 +75,20 @@ export default async function BookDetailPage({ params }: BookPageProps) {
       <Card className="relative my-4 overflow-hidden rounded-3xl border border-border/80 bg-card p-6 sm:p-8 md:p-10">
         <div className="relative z-10 flex flex-col items-center gap-6 sm:gap-8 md:flex-row md:items-end md:gap-10">
           <div className="relative shrink-0">
-            <div className="size-44 overflow-hidden rounded-2xl border border-border/60 bg-muted/30 sm:size-52 md:size-60">
-              <Image
-                src={book.cover || "/placeholder-cover.svg"}
-                alt={book.title}
-                width={300}
-                height={300}
-                priority
-                className="h-full w-full object-cover"
-              />
+            <div className="w-44 sm:w-52 md:w-60">
+              <AspectRatio
+                ratio={1}
+                className="overflow-hidden rounded-2xl border border-border/60 bg-muted/30"
+              >
+                <Image
+                  src={book.cover || "/placeholder-cover.svg"}
+                  alt={book.title}
+                  width={300}
+                  height={300}
+                  priority
+                  className="h-full w-full object-cover"
+                />
+              </AspectRatio>
             </div>
           </div>
 

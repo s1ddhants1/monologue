@@ -3,12 +3,13 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Minimize2, Volume2, VolumeX, List, Loader2, FileText, Sparkles } from "@/components/icons";
+import { Minimize2, List, FileText, Sparkles } from "@/components/icons";
 import { useAudioPlayer } from "../context";
 import { useUIStore } from "@/stores/ui-store";
 import { useSettingsStore } from "@/features/settings";
 import { useTranscriptionStore, transcribeAudio } from "@/features/transcription";
 import { composeSegments } from "@/hooks/use-transcript-viewer";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,7 +21,8 @@ import {
   EmptyDescription,
   EmptyContent,
 } from "@/components/ui/empty";
-import { Slider } from "@/components/ui/slider";
+import { Kbd } from "@/components/ui/kbd";
+import { Spinner } from "@/components/ui/spinner";
 import { hapticLight, hapticSuccess } from "@/lib/capacitor";
 import { cn } from "@/lib/utils";
 import { getStreamUrl } from "../utils/stream-url";
@@ -28,6 +30,7 @@ import { PlayerControls } from "./player-controls";
 import { TrackScrubber } from "./track-scrubber";
 import { SpeedMenu } from "./speed-menu";
 import { SleepTimerMenu } from "./sleep-timer-menu";
+import { VolumeControl } from "./volume-control";
 
 export function FullscreenPlayer() {
   const {
@@ -277,15 +280,20 @@ export function FullscreenPlayer() {
             isSidePanelActive ? "lg:max-w-md xl:max-w-lg" : "max-w-xl",
           )}
         >
-          <div className="relative mb-8 aspect-square w-48 shrink-0 overflow-hidden rounded-3xl border border-border/80 bg-muted/40 shadow-2xl sm:w-64 md:w-72 lg:w-80">
-            <Image
-              src={currentBook.cover || "/placeholder-cover.svg"}
-              alt={currentBook.title}
-              fill
-              sizes="(max-width: 640px) 192px, (max-width: 768px) 256px, 320px"
-              className="object-cover"
-              priority
-            />
+          <div className="relative mb-8 w-48 shrink-0 sm:w-64 md:w-72 lg:w-80">
+            <AspectRatio
+              ratio={1}
+              className="overflow-hidden rounded-3xl border border-border/80 bg-muted/40 shadow-2xl"
+            >
+              <Image
+                src={currentBook.cover || "/placeholder-cover.svg"}
+                alt={currentBook.title}
+                fill
+                sizes="(max-width: 640px) 192px, (max-width: 768px) 256px, 320px"
+                className="object-cover"
+                priority
+              />
+            </AspectRatio>
           </div>
 
           <div className="mb-8 w-full max-w-md text-center">
@@ -352,29 +360,32 @@ export function FullscreenPlayer() {
                 />
               </div>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleMute}
-                  title={isMuted ? "Unmute" : "Mute"}
-                  className="size-8 rounded-full text-muted-foreground"
-                >
-                  {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                </Button>
-                <Slider
-                  value={[isMuted ? 0 : volume * 100]}
-                  max={100}
-                  step={1}
-                  onValueChange={(val) => {
-                    const v = Array.isArray(val) ? val[0] : val;
-                    if (typeof v === "number") setVolume(v / 100);
-                  }}
-                  className="w-24 cursor-pointer"
-                  aria-label="Volume slider"
-                />
-              </div>
+              <VolumeControl
+                volume={volume}
+                isMuted={isMuted}
+                onToggleMute={toggleMute}
+                onVolumeChange={setVolume}
+                sliderClassName="w-24 cursor-pointer"
+                buttonSize="icon"
+                iconSize={16}
+                className="gap-2 text-muted-foreground"
+              />
+            </div>
+
+            <div className="hidden items-center justify-center gap-3 pt-2 text-xs text-muted-foreground/70 sm:flex">
+              <span className="inline-flex items-center gap-1">
+                <Kbd>Space</Kbd> Play/Pause
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Kbd>&larr;</Kbd>
+                <Kbd>&rarr;</Kbd> Seek
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Kbd>M</Kbd> Mute
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Kbd>Esc</Kbd> Minimize
+              </span>
             </div>
           </div>
         </div>
@@ -492,7 +503,7 @@ export function FullscreenPlayer() {
                       >
                         {isTranscribing ? (
                           <>
-                            <Loader2 size={14} className="animate-spin" />
+                            <Spinner className="size-3.5" />
                             Transcribing...
                           </>
                         ) : (

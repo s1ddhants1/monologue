@@ -1,16 +1,9 @@
 "use client";
 
 import React from "react";
-import {
-  Play,
-  Pause,
-  RotateCcw,
-  RotateCw,
-  SkipBack,
-  SkipForward,
-  Loader2,
-} from "@/components/icons";
+import { Play, Pause, RotateCcw, RotateCw, SkipBack, SkipForward } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 interface PlayerControlsProps {
@@ -90,7 +83,7 @@ export function PlayerControls({
           )}
         >
           {isLoading ? (
-            <Loader2 size={isLarge ? 22 : 18} className="animate-spin" />
+            <Spinner className={cn(isLarge ? "size-5" : "size-4")} />
           ) : isPlaying ? (
             <Pause size={isLarge ? 22 : 18} fill="currentColor" />
           ) : (

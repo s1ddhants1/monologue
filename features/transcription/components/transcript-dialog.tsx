@@ -4,7 +4,6 @@ import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sparkles,
-  Loader2,
   Copy,
   Check,
   Download,
@@ -17,6 +16,7 @@ import {
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Dialog,
   DialogContent,
@@ -342,7 +342,7 @@ export function TranscriptDialog() {
                 <div className="flex h-14 w-14 animate-pulse items-center justify-center rounded-2xl border border-primary/20 bg-primary/10">
                   <Sparkles className="size-7 text-primary" />
                 </div>
-                <Loader2 className="absolute -right-1 -bottom-1 size-6 animate-spin text-primary" />
+                <Spinner className="absolute -right-1 -bottom-1 size-6 text-primary" />
               </div>
               <div className="flex flex-col gap-1">
                 <h4 className="text-sm font-semibold text-foreground">
