@@ -324,19 +324,40 @@ export function FullscreenPlayer() {
           </div>
 
           <div className="flex w-full max-w-md flex-col items-center gap-6">
-            <PlayerControls
-              isPlaying={isPlaying}
-              isLoading={isLoading}
-              isMultiPart={isMultiPart}
-              canPrevTrack={currentTrackIndex > 0}
-              canNextTrack={currentTrackIndex < totalFiles - 1}
-              onTogglePlayPause={togglePlayPause}
-              onSkipBackward={() => skipBackward(15)}
-              onSkipForward={() => skipForward(15)}
-              onPrevTrack={prevTrack}
-              onNextTrack={nextTrack}
-              size="large"
-            />
+            <div className="flex items-center gap-2 sm:gap-4">
+              <SpeedMenu
+                playbackRate={playbackRate}
+                onSelectRate={setPlaybackRate}
+                align="start"
+                size="sm"
+                className="h-9 rounded-xl px-2.5 font-mono text-xs text-muted-foreground"
+              />
+
+              <PlayerControls
+                isPlaying={isPlaying}
+                isLoading={isLoading}
+                isMultiPart={isMultiPart}
+                canPrevTrack={currentTrackIndex > 0}
+                canNextTrack={currentTrackIndex < totalFiles - 1}
+                onTogglePlayPause={togglePlayPause}
+                onSkipBackward={() => skipBackward(15)}
+                onSkipForward={() => skipForward(15)}
+                onPrevTrack={prevTrack}
+                onNextTrack={nextTrack}
+                size="large"
+              />
+
+              <SleepTimerMenu
+                sleepTimerRemaining={sleepTimerRemaining}
+                sleepOnChapterEnd={sleepOnChapterEnd}
+                isMultiPart={isMultiPart}
+                onStartTimer={startSleepTimer}
+                onCancelTimer={cancelSleepTimer}
+                size="sm"
+                align="end"
+                className="h-9 rounded-xl px-2.5 text-xs text-muted-foreground"
+              />
+            </div>
 
             <TrackScrubber
               currentTime={currentTime}
@@ -346,37 +367,16 @@ export function FullscreenPlayer() {
               className="max-w-md"
             />
 
-            <div className="flex w-full max-w-md items-center justify-between pt-1">
-              <div className="flex items-center gap-2">
-                <SleepTimerMenu
-                  sleepTimerRemaining={sleepTimerRemaining}
-                  sleepOnChapterEnd={sleepOnChapterEnd}
-                  isMultiPart={isMultiPart}
-                  onStartTimer={startSleepTimer}
-                  onCancelTimer={cancelSleepTimer}
-                  size="sm"
-                  align="start"
-                  className="h-8 rounded-lg px-2.5 text-xs text-muted-foreground"
-                />
-
-                <SpeedMenu
-                  playbackRate={playbackRate}
-                  onSelectRate={setPlaybackRate}
-                  align="start"
-                  size="sm"
-                  className="h-8 rounded-lg px-2.5 font-mono text-xs text-muted-foreground"
-                />
-              </div>
-
+            <div className="flex w-full max-w-md items-center justify-center pt-1">
               <VolumeControl
                 volume={volume}
                 isMuted={isMuted}
                 onToggleMute={toggleMute}
                 onVolumeChange={setVolume}
-                sliderClassName="w-24 cursor-pointer"
+                sliderClassName="w-32 cursor-pointer sm:w-44"
                 buttonSize="icon"
                 iconSize={16}
-                className="gap-2 text-muted-foreground"
+                className="gap-2.5 text-muted-foreground"
               />
             </div>
 

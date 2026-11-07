@@ -22,14 +22,6 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
 import { getTrackDuration } from "../utils";
 import { cn } from "@/lib/utils";
 import { hapticLight } from "@/lib/capacitor";
@@ -74,103 +66,89 @@ export function TracklistInspector({ book: propBook, isDrawer = false }: Trackli
     }
   };
 
-  const tableElement = (
-    <Table className="w-full">
-      <TableHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
-        <TableRow className="border-b border-border/40 hover:bg-transparent">
-          <TableHead className="w-10 text-center text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-            #
-          </TableHead>
-          <TableHead className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-            Title
-          </TableHead>
-          <TableHead className="w-20 text-right text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-            Duration
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {audioFiles.map((file, idx) => {
-          const isCurrent = isCurrentlyPlayingThisBook && currentTrackIndex === idx;
+  const trackListElement = (
+    <div className="flex flex-col divide-y divide-border/30">
+      {audioFiles.map((file, idx) => {
+        const isCurrent = isCurrentlyPlayingThisBook && currentTrackIndex === idx;
 
-          let displayName = file.name;
-          displayName = displayName.replace(
-            /\.(mp3|m4b|m4a|aac|flac|ogg|oga|opus|wav|wma|webm|alac|aiff)$/i,
-            "",
-          );
+        let displayName = file.name;
+        displayName = displayName.replace(
+          /\.(mp3|m4b|m4a|aac|flac|ogg|oga|opus|wav|wma|webm|alac|aiff)$/i,
+          "",
+        );
 
-          const trackDuration = getTrackDuration(
-            file,
-            targetBook,
-            isCurrent,
-            currentPlaybackDuration,
-          );
+        const trackDuration = getTrackDuration(
+          file,
+          targetBook,
+          isCurrent,
+          currentPlaybackDuration,
+        );
 
-          return (
-            <TableRow
-              key={file.name || idx}
-              onClick={() => handleSelectTrack(idx)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  handleSelectTrack(idx);
-                }
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={`${isCurrent && isPlaying ? "Pause" : "Play"} ${displayName}`}
-              className={cn(
-                "group/song cursor-pointer transition-colors hover:bg-muted/50",
-                isCurrent &&
-                  "border-l-2 border-primary bg-secondary/80 font-medium text-foreground",
-              )}
-            >
-              <TableCell className="w-10 p-2 text-center">
-                <div className="flex items-center justify-center">
-                  {isCurrent && isPlaying ? (
-                    <>
-                      <AudioLines className="h-4 w-4 animate-pulse text-primary group-hover/song:invisible sm:h-3.5 sm:w-3.5" />
-                      <Pause className="invisible absolute h-4 w-4 text-primary group-hover/song:visible sm:h-3.5 sm:w-3.5" />
-                    </>
-                  ) : isCurrent ? (
-                    <Play className="h-4 w-4 text-primary sm:h-3.5 sm:w-3.5" fill="currentColor" />
-                  ) : (
-                    <>
-                      <span className="font-mono text-xs text-muted-foreground/60 tabular-nums group-hover/song:invisible">
-                        {idx + 1}
-                      </span>
-                      <Play className="invisible absolute h-4 w-4 text-foreground group-hover/song:visible sm:h-3.5 sm:w-3.5" />
-                    </>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell
-                className={cn(
-                  "truncate p-2 text-sm",
-                  isCurrent ? "font-medium text-primary" : "text-foreground",
+        return (
+          <div
+            key={file.name || idx}
+            onClick={() => handleSelectTrack(idx)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleSelectTrack(idx);
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label={`${isCurrent && isPlaying ? "Pause" : "Play"} ${displayName}`}
+            className={cn(
+              "group/song flex cursor-pointer items-center justify-between gap-3 rounded-xl p-2.5 transition-colors select-none hover:bg-muted/50 sm:p-3",
+              isCurrent && "border-l-2 border-primary bg-secondary/80 font-medium text-foreground",
+            )}
+          >
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground transition-colors group-hover/song:bg-primary group-hover/song:text-primary-foreground">
+                {isCurrent && isPlaying ? (
+                  <>
+                    <AudioLines className="size-4 animate-pulse text-primary group-hover/song:invisible" />
+                    <Pause className="invisible absolute size-4 group-hover/song:visible" />
+                  </>
+                ) : isCurrent ? (
+                  <Play className="size-3.5 fill-current text-primary" />
+                ) : (
+                  <>
+                    <span className="font-mono text-xs tabular-nums group-hover/song:invisible">
+                      {idx + 1}
+                    </span>
+                    <Play className="invisible absolute size-3.5 fill-current group-hover/song:visible" />
+                  </>
                 )}
-              >
-                {displayName}
-              </TableCell>
-              <TableCell className="w-20 p-2 text-right font-mono text-xs text-muted-foreground tabular-nums">
-                {trackDuration}
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div
+                  className={cn(
+                    "text-sm leading-snug break-words",
+                    isCurrent ? "font-semibold text-primary" : "text-foreground",
+                  )}
+                >
+                  {displayName}
+                </div>
+              </div>
+            </div>
+
+            <div className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
+              {trackDuration}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 
   if (!isDrawer) {
     return (
       <Card
-        className="track-list gap-0 rounded-2xl border border-border/80 bg-card p-2 sm:p-3"
+        className="track-list gap-0 overflow-hidden rounded-2xl border border-border/80 bg-card p-1 sm:p-2"
         id="album-detail-tracklist"
       >
-        <ScrollArea className="max-h-[60vh] overflow-hidden pr-1 sm:max-h-[600px] [&_[data-slot=scroll-area-viewport]]:max-h-[60vh] [&_[data-slot=scroll-area-viewport]]:overscroll-contain sm:[&_[data-slot=scroll-area-viewport]]:max-h-[600px]">
-          {tableElement}
-        </ScrollArea>
+        {trackListElement}
       </Card>
     );
   }
@@ -188,7 +166,7 @@ export function TracklistInspector({ book: propBook, isDrawer = false }: Trackli
             </DrawerDescription>
           </DrawerHeader>
           <div className="flex-1 overflow-hidden pt-2">
-            <ScrollArea className="h-[75vh] pr-1">{tableElement}</ScrollArea>
+            <ScrollArea className="h-[75vh] pr-1">{trackListElement}</ScrollArea>
           </div>
         </DrawerContent>
       </Drawer>
@@ -208,7 +186,7 @@ export function TracklistInspector({ book: propBook, isDrawer = false }: Trackli
           </SheetDescription>
         </SheetHeader>
         <div className="flex-1 overflow-hidden pt-2">
-          <ScrollArea className="h-[calc(100vh-140px)] pr-1">{tableElement}</ScrollArea>
+          <ScrollArea className="h-[calc(100vh-140px)] pr-1">{trackListElement}</ScrollArea>
         </div>
       </SheetContent>
     </Sheet>

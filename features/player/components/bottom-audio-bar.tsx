@@ -171,6 +171,12 @@ export function BottomAudioBar() {
 
         <div className="flex shrink-0 items-center justify-center sm:mx-auto sm:max-w-md sm:flex-1 sm:flex-col">
           <div className="flex items-center gap-1 sm:gap-2">
+            <SpeedMenu
+              playbackRate={playbackRate}
+              onSelectRate={setPlaybackRate}
+              align="start"
+              size="icon-sm"
+            />
             <PlayerControls
               isPlaying={isPlaying}
               isLoading={isLoading}
@@ -192,12 +198,6 @@ export function BottomAudioBar() {
               onCancelTimer={cancelSleepTimer}
               size="icon-sm"
               align="end"
-            />
-            <SpeedMenu
-              playbackRate={playbackRate}
-              onSelectRate={setPlaybackRate}
-              align="end"
-              size="icon-sm"
             />
           </div>
           <div className="hidden w-full md:block">
