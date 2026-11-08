@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { hapticLight } from "@/lib/capacitor";
+import { cn } from "@/lib/utils";
 
 const SPEED_OPTIONS = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0] as const;
 
@@ -27,7 +28,7 @@ export function SpeedMenu({
   onSelectRate,
   align = "end",
   size = "icon-sm",
-  className = "font-mono text-xs",
+  className,
 }: SpeedMenuProps) {
   return (
     <DropdownMenu>
@@ -39,7 +40,7 @@ export function SpeedMenu({
             variant="ghost"
             size={size}
             title={`Speed: ${playbackRate}x`}
-            className={className}
+            className={cn("font-mono text-xs", className)}
           />
         }
       >

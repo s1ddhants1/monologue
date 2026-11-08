@@ -176,6 +176,7 @@ export function BottomAudioBar() {
               onSelectRate={setPlaybackRate}
               align="start"
               size="icon-sm"
+              className="hidden sm:inline-flex"
             />
             <PlayerControls
               isPlaying={isPlaying}
@@ -198,6 +199,7 @@ export function BottomAudioBar() {
               onCancelTimer={cancelSleepTimer}
               size="icon-sm"
               align="end"
+              className="hidden sm:inline-flex"
             />
           </div>
           <div className="hidden w-full md:block">
