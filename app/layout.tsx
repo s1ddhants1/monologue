@@ -39,8 +39,8 @@ export default function RootLayout({
             <CapacitorLifecycleListener />
             <SidebarProvider>
               <AppSidebar />
-              <SidebarInset className="min-w-0 [scrollbar-gutter:stable] overflow-x-hidden bg-background md:h-dvh md:scroll-pt-[76px] md:overflow-y-auto">
-                <div className="relative mx-auto w-full max-w-7xl min-w-0 flex-1 px-3 pb-[calc(var(--player-bar-height-mobile,100px)+20px)] sm:px-5 md:px-7 md:pb-[calc(var(--player-bar-height-desktop,84px)+24px)] lg:px-8">
+              <SidebarInset className="min-w-0 [scrollbar-gutter:stable] overflow-x-clip bg-background md:h-dvh md:scroll-pt-[76px] md:overflow-y-auto">
+                <div className="relative mx-auto w-full max-w-7xl min-w-0 flex-1 px-3 pb-[calc(var(--player-bar-height-mobile,100px)+20px+env(safe-area-inset-bottom,0px))] sm:px-5 md:px-7 md:pb-[calc(var(--player-bar-height-desktop,84px)+24px)] lg:px-8">
                   <AppHeader />
                   {children}
                 </div>

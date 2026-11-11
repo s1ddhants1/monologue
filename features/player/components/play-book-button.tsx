@@ -62,7 +62,7 @@ function PlayBookButtonComponent({ book, children, trailingActions }: PlayBookBu
       : undefined);
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex w-full flex-wrap items-center justify-center gap-2 md:w-auto md:justify-start">
       <Button
         onClick={handlePlayClick}
         type="button"

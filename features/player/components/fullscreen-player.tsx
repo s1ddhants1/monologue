@@ -217,7 +217,7 @@ export function FullscreenPlayer() {
       id="fullscreen-player"
       className="fixed inset-0 z-50 flex flex-col bg-background/98 backdrop-blur-2xl transition-all duration-300 ease-out"
     >
-      <div className="flex h-16 shrink-0 items-center justify-between border-b border-border/60 px-5 sm:px-8">
+      <div className="flex min-h-16 shrink-0 items-center justify-between border-b border-border/60 px-5 pt-[env(safe-area-inset-top)] sm:px-8">
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="text-xs font-semibold">
             Now Playing
@@ -273,7 +273,7 @@ export function FullscreenPlayer() {
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-6 sm:p-10 lg:flex-row lg:gap-12">
+      <div className="flex min-h-0 flex-1 flex-col items-center [justify-content:safe_center] overflow-y-auto p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-10 lg:flex-row lg:gap-12">
         <div
           className={cn(
             "flex w-full flex-col items-center justify-center transition-all duration-300",

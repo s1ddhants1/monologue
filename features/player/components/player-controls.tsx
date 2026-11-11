@@ -74,7 +74,7 @@ export function PlayerControls({
         onClick={onTogglePlayPause}
         disabled={isLoading}
         title={isPlaying ? "Pause" : "Play"}
-        className={cn("rounded-full", isLarge ? "size-12" : "size-9 sm:size-10")}
+        className={cn("rounded-full", isLarge ? "size-12" : "size-11 sm:size-10")}
       >
         <span
           className={cn(

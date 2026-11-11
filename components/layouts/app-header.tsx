@@ -30,9 +30,9 @@ export function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-20 mb-3 flex min-h-[50px] w-full items-center justify-between gap-2 bg-background py-1.5 md:mb-4 md:min-h-[56px] md:gap-4 md:py-2">
+    <header className="sticky top-0 z-20 mb-3 flex min-h-[50px] w-full items-center justify-between gap-2 bg-background pt-[max(0.375rem,env(safe-area-inset-top))] pb-1.5 md:mb-4 md:min-h-[56px] md:gap-4 md:py-2">
       <div className="flex items-center gap-2">
-        <SidebarTrigger className="-ml-1 cursor-pointer" />
+        <SidebarTrigger className="relative -ml-1 cursor-pointer after:absolute after:-inset-2 md:after:hidden" />
         <Separator orientation="vertical" className="hidden h-4 sm:block" />
         <div className="hidden items-center gap-1.5 md:flex">
           <Button
@@ -68,7 +68,7 @@ export function AppHeader() {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-[480px] flex-1 justify-center">
+      <div className="mx-auto flex max-w-[480px] min-w-0 flex-1 justify-center">
         <form className="flex w-full items-center" id="search-form" onSubmit={handleSearchSubmit}>
           <InputGroup className="h-9 w-full rounded-lg border-border/60 bg-muted/40 transition-all focus-within:border-ring focus-within:bg-muted/70 hover:bg-muted/50">
             <InputGroupAddon align="inline-start">

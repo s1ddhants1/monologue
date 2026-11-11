@@ -36,7 +36,7 @@ export default function BookError({
             We couldn&apos;t fetch the audiobook details. The source may be temporarily unavailable.
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent className="flex-row gap-3">
+        <EmptyContent className="flex-row flex-wrap justify-center gap-3">
           <Button type="button" onClick={reset} variant="default">
             <RotateCcw size={16} className="mr-1.5" />
             <span>Retry</span>

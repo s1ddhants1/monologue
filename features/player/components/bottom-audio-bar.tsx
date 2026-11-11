@@ -104,7 +104,7 @@ export function BottomAudioBar() {
 
   return (
     <footer
-      className="fixed inset-x-3 bottom-3 z-40 flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-background/95 backdrop-blur-2xl transition-all duration-200 sm:inset-x-6 sm:bottom-4 md:right-6 md:bottom-5 md:left-[calc(var(--sidebar-width,15rem)+1.5rem)] lg:mx-auto lg:max-w-5xl"
+      className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-background/95 backdrop-blur-2xl transition-all duration-200 sm:inset-x-6 sm:bottom-[max(1rem,env(safe-area-inset-bottom))] md:right-6 md:bottom-5 md:left-[calc(var(--sidebar-width,15rem)+1.5rem)] lg:mx-auto lg:max-w-5xl"
       role="region"
       aria-label="Audio player"
     >

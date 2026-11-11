@@ -124,7 +124,7 @@ export function TracklistInspector({ book: propBook, isDrawer = false }: Trackli
               <div className="min-w-0 flex-1">
                 <div
                   className={cn(
-                    "text-sm leading-snug break-words",
+                    "text-sm leading-snug wrap-anywhere",
                     isCurrent ? "font-semibold text-primary" : "text-foreground",
                   )}
                 >

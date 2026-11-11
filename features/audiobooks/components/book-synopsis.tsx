@@ -64,7 +64,7 @@ export function parseTextSegments(line: string): Segment[] {
 function renderParagraph(para: string, pIdx: number) {
   const segments = parseTextSegments(para);
   return (
-    <p key={pIdx} className="break-words">
+    <p key={pIdx} className="text-pretty wrap-anywhere">
       {segments.map((seg, sIdx) => {
         if (seg.type === "link" && seg.url) {
           return (
@@ -75,10 +75,10 @@ function renderParagraph(para: string, pIdx: number) {
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 title={`Open ${seg.url}`}
-                className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                className="inline font-medium wrap-anywhere text-primary hover:underline"
               >
                 <span>{seg.content}</span>
-                <ExternalLink size={12} className="inline shrink-0" />
+                <ExternalLink size={12} className="ml-1 inline shrink-0 align-baseline" />
               </a>
               {seg.trailing && <span>{seg.trailing}</span>}
             </React.Fragment>

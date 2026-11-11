@@ -28,7 +28,7 @@ export default function NotFound() {
             release.
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent className="flex-row gap-3">
+        <EmptyContent className="flex-row flex-wrap justify-center gap-3">
           <Button
             render={<Link href="/" />}
             nativeButton={false}

@@ -34,16 +34,20 @@ function parseCategories($: cheerio.CheerioAPI, root: unknown): string[] {
 
   $root.find(".postInfo a, a[rel='category tag']").each((_, el) => {
     const value = cleanText($(el).text());
-    if (value) categories.add(value);
+    if (value && !/\b(?:Language|Keywords)\s*:/i.test(value)) {
+      categories.add(value);
+    }
   });
 
   const postInfo = cleanText($root.find(".postInfo").text() || $root.text());
-  const categoryMatch = postInfo.match(/Category:\s*([^|;]+)/i);
+  const categoryMatch = postInfo.match(
+    /Category:\s*(.+?)(?=\s*(?:Language|Keywords|Format|Bit\s*Rate|Bitrate|File\s*Size|Length|Posted|Shared)\s*:|[|;]|$)/i,
+  );
   if (categoryMatch) {
     categoryMatch[1]
       .split(/,|\s+\/\s+|\s+\|\s+/)
       .map(cleanText)
-      .filter((value) => value.length > 1)
+      .filter((value) => value.length > 1 && !/\b(?:Language|Keywords)\s*:/i.test(value))
       .forEach((value) => categories.add(value));
   }
 
